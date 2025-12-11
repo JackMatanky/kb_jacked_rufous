@@ -1,0 +1,1353 @@
+---
+# ------------------------------------------------------------ #
+#                             META                             #
+# ------------------------------------------------------------ #
+meta:
+  engine: 4.2.1
+  version: 0.2.1
+  author: JackMatanky
+  name: jacked_rufous
+  ref: &kb_ref "Jacked Rufous v0.2.1"
+  full_name: &kb_full_name "SNAK: Sisyphus Needed a Keyboard, v0.2.1"
+  url: &kb_url https://github.com/JackMatanky/kb_snak
+  preset:
+    $extends:
+      - settings.switch
+      - settings.key_diode
+      - settings.mcu
+      - settings.display
+      - settings.power
+      - settings.reset
+      - settings.battery_connector
+
+# ------------------------------------------------------------ #
+#                           SETTINGS                           #
+# ------------------------------------------------------------ #
+settings:
+  switch:
+    # $extends: presets.key.mx
+    $extends: presets.key.choc_v1
+    # $extends: presets.key.choc_v2
+    key_size_xo: 0.5(key_size_x)
+    key_size_yo: 0.5(key_size_y)
+    # Key Padding
+    key_pad: 4
+    key_pad_x: key_size_x + key_pad
+    key_pad_y: key_size_y + key_pad
+    key_pad_xo: 0.5(key_pad_x)
+    key_pad_yo: 0.5(key_pad_y)
+    key_dpad_x: key_size_x + 2(key_pad)
+    key_dpad_y: key_size_y + 2(key_pad)
+  key_diode:
+    $extends: presets.key_diode.single
+    # $extends: presets.key_diode.double
+    diode_size_x: 1.2 # Short Side
+    diode_size_y: 4.2 # Long Side
+    diode_size_xo: diode_size_x/2
+    diode_size_yo: diode_size_y/2
+    diode_smd_size_x: diode_size_x
+    diode_smd_size_y: 0.9
+  mcu:
+    $extends: presets.mcu.nice_nano
+    # $extends: presets.mcu.xiao
+    mcu_size_xo: 0.5(mcu_size_x)
+    mcu_size_yo: 0.5(mcu_size_y)
+  display:
+    $extends: presets.display.nice_view
+    # $extends: presets.display.other_display
+    oled_size_xo: 0.5(oled_size_x)
+    oled_size_yo: 0.5(oled_size_y)
+  power:
+    $extends: presets.power.smd_side
+    # $extends: presets.power.tht_top
+    power_size_xo: 0.5(power_size_x)
+    power_size_yo: 0.5(power_size_y)
+  reset:
+    $extends: presets.reset.smd_side
+    # $extends: presets.reset.tht_top
+    reset_size_xo: 0.5(reset_size_x)
+    reset_size_yo: 0.5(reset_size_y)
+  battery_connector:
+    $extends: presets.battery_connector.jst_2p_curved
+    # $extends: presets.battery_connector.jst_2p_straight
+    bat_size_xo: 0.5(bat_size_x)
+    bat_size_yo: 0.5(bat_size_y)
+  point_debugger:
+    enabled: true
+
+# ------------------------------------------------------------ #
+#                            PRESETS                           #
+# ------------------------------------------------------------ #
+presets:
+  # These presets provide different layout options
+  # Select a preset in the `units` section below
+  # Note: The appropriate switch footprint will still need to be set in the `pcb` section
+  # ----------------- Key And Keycap Measures ---------------- #
+  # size: spacing between key centers
+  # column spread: horizontal spacing between keys (default: 19)
+  # row padding: vertical spacing between keys (default: 19)
+  # switch cutout: size of the hole in the PCB for the switch (cherry, choc v2: 14, choc v1: 13.8)
+  # keycap: size of the keycap (cherry: 18 x 18, choc: 17.5 x 16.5)
+  key:
+    mx:
+      key_size_x: u # 19
+      key_size_y: u # 19
+      key_switch_cutout_x: 14
+      key_switch_cutout_y: 14
+      key_cap_x: 18
+      key_cap_y: 18
+      key_col_spread: 19
+      key_row_padding: 19
+      pinky_splay: 5
+      pinky_adj: -4
+      ring_splay: 3
+      ring_adj: -10
+    choc_v1:
+      key_size_x: cx # 18
+      key_size_y: cy # 17
+      key_switch_cutout_x: 13.8
+      key_switch_cutout_y: 13.8
+      key_cap_x: key_size_x - 0.5
+      key_cap_y: key_size_y - 0.5
+      key_col_spread: key_size_x + 0.5
+      key_row_padding: key_size_y + 0.5
+      pinky_splay: 5
+      pinky_adj: -3
+      ring_splay: 3
+      ring_adj: -8
+    choc_v2:
+      $extends: presets.key.choc_v1
+      key_size_x: u
+      key_size_y: u
+      key_cap_x: 18
+      key_cap_y: 18
+      key_col_spread: 19
+      key_row_padding: 19
+
+  key_diode:
+    single:
+      diode_shift_x: 0
+      diode_shift_y: 3.5
+      diode_matrix_rotate: 180
+    double:
+      diode_shift_x: 7.8
+      diode_shift_y: 0.25
+      diode_matrix_rotate: 270
+
+  mcu:
+    nice_nano: # nice!nano: 34.1 x 18.3 x 3.3 (mm)
+      mcu_size_x: 18.3
+      mcu_size_y: 34.1
+      mcu_usb_conn_size_x: 8.94
+      mcu_usb_conn_size_y: 7.35
+    xiao: # XIAO nRF52840: 20 x 17.5 x 3.3 (mm)
+      mcu_size_x: 20
+      mcu_size_y: 17.5
+
+  display:
+    nice_view: # nice!view: 36 x 14 x 2.9 (mm)
+      oled_size_x: 14
+      oled_size_y: 36
+      oled_jumper_x: 12.82
+      oled_jumper_y: 2.66
+      oled_jumper_shift_y: -16.7
+      # Screen Size and Offset From Center
+      oled_screen_offset_x: 1.6
+      oled_screen_offset_top_y: 2.45 + 3.65 # = 6.1
+      oled_screen_offset_bot_y: 1.3 + 1.7 + 1.6 # = 4.6
+      oled_screen_size_x: oled_size_x - 2(oled_screen_offset_x)
+      oled_screen_size_y: oled_size_y - (oled_screen_offset_top_y + oled_screen_offset_bot_y)
+      oled_screen_size_xo: 0.5(oled_screen_size_x)
+      oled_screen_size_yo: 0.5(oled_screen_size_y)
+      oled_screen_shift_x: 0
+      oled_screen_shift_y: oled_size_y/2 - (oled_screen_size_yo + oled_screen_offset_top_y)
+
+  power:
+    smd_side: # 3.0 ± 0.05 x 8.3
+      power_size_x: 4.55 # Footprint size
+      power_size_y: 8.8 # Footprint size; switch side
+
+  reset:
+    smd_side:
+      reset_size_x: 5.5 # Footprint; Actual height: 4.7
+      reset_size_y: 3.4 # Footprint; Actual width: 2.9
+    tht_top:
+      reset_size_x: 6.5 # Footprint; Actual height: 4.7
+      reset_size_y: 3.4 # Footprint; Actual width: 2.9
+
+  battery_connector:
+    jst_2p_curved: # JST 2P Curved Needle
+      # Footprint center at (3.45, 1.85)
+      bat_size_x: 6.9 # Footprint; Actual width: 4.5 ± 0.2
+      bat_size_y: 10.35 # Footprint; Actual height: 6.1 ± 0.1
+      bat_main_size_y: 3.7
+      bat_sec_size_y: bat_size_y - bat_main_size_y
+      bat_main_size_yo: 0.5(bat_main_size_y)
+      bat_sec_size_yo: 0.5(bat_sec_size_y)
+    jst_2p_straight: # JST 2P Straight Needle
+      bat_size_x: 6.9 # Footprint; Actual width: 4.5 ± 0.2
+      bat_size_y: 8.75 # Footprint; Actual height: 4.5 ± 0.1
+    molex_2p: # Molex PicoBlade 2P
+      bat_size_x: 6.5 # Footprint; Actual width: 4.0 ± 0.1
+      bat_size_y: 7.25 # Footprint; Actual height: 3.5 ± 0.1
+
+# ------------------------------------------------------------ #
+#                             UNITS                            #
+# ------------------------------------------------------------ #
+units:
+  $extends: meta.preset
+
+  mirror_shift: 16
+  mirror_angle: 22
+  mirror_distance: 2.5(key_size_x) # 23
+
+  key_rotate: 180
+  inner_key_rotate: 270
+
+  ring_col_stagger: 3(key_size_x)/5
+  middle_col_stagger: (key_size_x)/3
+  index_col_stagger: -2(key_size_x)/5
+  inner_col_stagger: -3(key_size_x)/5
+  thumb_col_stagger: -(key_size_x)/8
+
+  thumb_offset_x: 0 #(key_size_x)/7
+  thumb_offset_y: -(key_size_y + 5)
+  thumb_out_splay: -12
+  thumb_in_splay: -13
+  thumb_in_spread: key_size_x + 1.75
+
+  diode_via_shift_x: diode_size_yo + 0.6
+  diode_via_shift_y: diode_shift_y
+
+  via_row_net_shift_x: 0
+  via_row_net_shift_y: 2.5
+  via_colrow_shift_x: 0
+  via_colrow_shift_y: -2.5
+  via_col_net_shift_x: 0
+  via_col_net_shift_y: -3.6
+
+  # --------------------------- MCU -------------------------- #
+  mcu_shift_x: 0
+  mcu_shift_y: -power_size_x
+
+  # ---------------------- OLED Display ---------------------- #
+  oled_shift_x: 0
+  oled_shift_y: mcu_size_yo - (oled_size_yo + oled_jumper_y + 0.5)
+
+  # OLED vias
+  oled_mosi_via_shift_x: 4.45
+  oled_mosi_via_shift_y: -(oled_size_yo - 5.55)
+  oled_cs_via_shift_x: 3.85
+  oled_cs_via_shift_y: -(oled_size_yo - 3.95) # oled_mosi_via_shift_y - 0.9
+  oled_sck_via_shift_y: -(oled_size_yo - 3.95)
+  oled_gnd_via_shift_y: oled_sck_via_shift_y - 1
+
+  # ---------------------- Power Switch ---------------------- #
+  power_shift_x: 0 #0.9
+  power_shift_y: mcu_size_yo - power_size_xo/2 # - 0.445
+  power_rotate: 90
+
+  # ------------------ JST Battery Connector ----------------- #
+  bat_main_shift_x: -(bat_size_x + mcu_size_xo)
+  bat_main_shift_y: mcu_size_y/3 #-(mcu_size_yo + oled_jumper_y + bat_size_x)
+  bat_sec_shift_x: 0
+  bat_sec_shift_y: -(bat_main_size_yo + bat_sec_size_yo)
+  bat_rotate: 0
+
+  bat_pos_via_shift_y: -(bat_size_yo - 1.5)
+  bat_gnd_via_shift_y: bat_main_size_yo - 0.5
+
+  # ---------------------- Reset Switch ---------------------- #
+  reset_shift_x: 0
+  reset_shift_y: -(oled_size_yo + reset_size_y)
+  reset_rotate: 180 # 270 + 52
+
+  reset_via_shift_x: 3(reset_size_x)/4
+  reset_via_shift_y: (reset_size_yo)/2
+
+  # ----------------------- Trackpoint ----------------------- #
+  tp_size_x: 12.5
+  tp_size_y: 23.3
+  tp_size_xo: 0.5(tp_size_x)
+  tp_size_yo: 0.5(tp_size_y)
+  tp_shift_x: -2.5
+  tp_shift_y: 1.5
+  tp_rotate: 0
+
+  # Outline
+  tp_mount_size_x: 5.5
+  tp_mount_size_y: 5
+  tp_hex_diag_size: 3.5
+  tp_hex_side_size: 6
+  tp_hex_size_y: 2(tp_hex_diag_size) + tp_hex_side_size
+  tp_hex_size_yo: tp_hex_size_y/2
+  tp_hole_radius_stick: 3.7
+
+  # TP Reset Circuit
+  tp_reset_size_x: 7.975
+  tp_reset_size_y: 3.36
+  tp_reset_shift_x: mcu_size_x
+  tp_reset_shift_y: mcu_size_y/3
+  tp_reset_rotate: 180
+
+  # TP Pads
+  tp_pads_size_x: 9
+  tp_pads_size_y: 2
+  tp_pads_shift_x: 0
+  tp_pads_shift_y: 3(tp_pads_size_y)
+  tp_pads_rotate: 180
+
+  # -------------------- PCB & Case Holes -------------------- #
+  # Points height and width
+  hole_size: 0.1
+  hole_radius_screw: 1
+  hole_radius_standoff: 1.5
+  hole_radius_mount: 2.1
+
+  # Hole Positions
+  hole_key_shift: key_size_yo + hole_radius_mount
+  hole_thumb_shift: 18.5/4 #9.25
+  hole_tp_shift_x: 0
+  hole_tp_shift_y: (tp_size_yo - hole_radius_mount)
+
+  # ---------------------- Board Outline --------------------- #
+  # >>> Unibody Bridge <<<
+  top_rect_shift_y: 13.75
+
+  # Circle
+  bot_crcl_radius: 80
+  bot_crcl_shift_x: 0
+  bot_crcl_shift_y: -(bot_crcl_radius) + 14
+
+  # -------------------- Battery Rectangle ------------------- #
+  bat_rect_size_x: 60
+  bat_rect_size_y: 50
+  bat_rect_shift_x: 2.5
+  bat_rect_shift_y: -6.75
+  bat_rect_rotate: 0
+
+# ------------------------------------------------------------ #
+#                            POINTS                            #
+# ------------------------------------------------------------ #
+points.zones:
+  # ------------------ Base Keyboard Matrix ------------------ #
+  matrix:
+    # Position in center of KiCAD workspace.
+    anchor.shift: [125, -125]
+    rotate: -mirror_angle + pinky_splay + ring_splay
+    mirror:
+      ref: matrix_c5_r1
+      shift: [0.5(mirror_shift), 0.5(mirror_shift)]
+      distance: mirror_distance
+    key:
+      width: key_cap_x
+      height: key_cap_y
+      padding: key_row_padding
+      spread: key_col_spread
+      # autobind: false
+      # bind: [top, right, bottom, left]
+    rows:
+      r3: # Bottom
+        row_net: R3
+        mirror.row_net: R6
+      r2: # Home
+        row_net: R2
+        mirror.row_net: R5
+      r1: # Top
+        row_net: R1
+        mirror.row_net: R4
+    columns:
+      # Pinky
+      c1:
+        key:
+          tags:
+            - key
+            - pinky
+            - non_tp
+        rows:
+          r3.skip: true
+          r2:
+            bind: [key_size_yo, key_size_xo, 0, 0]
+            column_net: C1
+            mirror.column_net: C1
+          r1:
+            bind: [0, key_size_xo, key_size_yo, 0]
+            column_net: C1
+            mirror.column_net: C1
+      # Ring
+      c2:
+        key:
+          tags:
+            - key
+            - ring
+            - non_tp
+          stagger: ring_col_stagger
+          splay: -pinky_splay
+          origin: [0, pinky_adj]
+        rows:
+          r3:
+            bind: [key_size_yo, 0, 0, 0]
+            column_net: C1
+            mirror.column_net: C1
+          r2:
+            bind: [0, key_size_xo, 0, 0]
+            column_net: C2
+            mirror.column_net: C2
+          r1:
+            bind: [0, key_size_xo, key_size_yo, 0]
+            column_net: C2
+            mirror.column_net: C2
+      c3:
+        key:
+          tags:
+            - key
+            - r2dle
+            - non_tp
+          stagger: middle_col_stagger
+          splay: -ring_splay
+          origin: [0, ring_adj]
+        rows:
+          r3:
+            bind: [key_size_yo, key_size_xo, 0, key_size_xo]
+            column_net: C2
+            mirror.column_net: C2
+          r2:
+            bind: [0, key_size_xo, 0, 0]
+            column_net: C3
+            mirror.column_net: C3
+          r1:
+            bind: [0, 0, key_size_yo, 0]
+            column_net: C3
+            mirror.column_net: C3
+      c4:
+        key:
+          tags:
+            - key
+            - index
+            - non_tp
+          stagger: index_col_stagger
+        rows:
+          r3:
+            bind: [key_size_yo, 0, key_size_y, 0]
+            column_net: C3
+            mirror.column_net: C3
+          r2:
+            column_net: C4
+            mirror.column_net: C4
+          r1:
+            bind: [0, 0.5, key_size_yo, key_size_xo]
+            column_net: C4
+            mirror.column_net: C4
+      c5:
+        key:
+          tags:
+            - key
+            - inner
+          stagger: inner_col_stagger
+        rows:
+          r3.skip: true
+          r2:
+            bind: [key_size_yo, 0, key_size_yo, key_size_xo]
+            column_net: C5
+            mirror.column_net: C5
+          r1:
+            bind: [0, 0, key_size_yo, key_size_xo]
+            column_net: C5
+            mirror.column_net: C5
+  thumb:
+    mirror.$extends: points.zones.matrix.mirror
+    key.tags:
+      - key
+      - thumb
+      - non_tp
+    anchor:
+      ref: matrix_c4_r3
+      shift: [thumb_offset_x, thumb_offset_y]
+    rows.home:
+      row_net: R3
+      mirror.row_net: R3
+    columns:
+      # Pinky side (tucky)
+      out.key:
+        name: thumb_out
+        splay: thumb_out_splay
+        bind: [key_size_yo, key_size_xo, 0, 0]
+        column_net: C4
+        mirror.column_net: C4
+      # Inner side (reachy)
+      in.key:
+        name: thumb_in
+        stagger: thumb_col_stagger
+        spread: thumb_in_spread
+        splay: thumb_in_splay
+        bind: [1.5(key_size_y), 0, 0, 0]
+        column_net: C5
+        mirror.column_net: C5
+
+  ref_top_center:
+    anchor:
+      aggregate.parts:
+        - ref: matrix_c5_r1
+        - ref: mirror_matrix_c5_r1
+      shift: [0, -0.75(key_size_y)]
+
+  ref_bottom_center:
+    anchor:
+      aggregate.parts:
+        - ref: thumb_in
+        - ref: mirror_thumb_in
+      shift: [0, -(key_size_yo)]
+  # ----------------------- Components ----------------------- #
+  mcu:
+    key:
+      tags: part
+      width: mcu_size_x
+      height: mcu_size_y
+    anchor:
+      ref: ref_top_center
+      shift: [mcu_shift_x, mcu_shift_y]
+
+  oled:
+    key:
+      tags: part
+      width: oled_size_x
+      height: oled_size_y
+    anchor:
+      ref: mcu
+      shift: [oled_shift_x, oled_shift_y + oled_jumper_y/2]
+  oled_screen:
+    key:
+      tags: part
+      width: oled_screen_size_x
+      height: oled_screen_size_y
+    anchor:
+      ref: oled
+      shift: [oled_screen_shift_x, oled_screen_shift_y]
+
+  power:
+    key:
+      tags: part
+      width: power_size_x
+      height: power_size_y
+    anchor:
+      ref: mcu
+      shift: [power_shift_x, power_shift_y]
+      rotate: power_rotate
+
+  reset:
+    key:
+      tags: part
+      width: reset_size_x
+      height: reset_size_y
+    anchor:
+      ref: oled
+      shift: [reset_shift_x, reset_shift_y]
+      rotate: reset_rotate
+
+  bat_main:
+    key:
+      tags: part
+      name: bat_main
+      width: bat_size_x
+      height: bat_main_size_y
+    anchor:
+      ref: mcu
+      shift: [bat_main_shift_x, bat_main_shift_y]
+      rotate: bat_rotate
+  bat_sec:
+    key:
+      tags: part
+      name: bat_sec
+      width: bat_size_x
+      height: bat_sec_size_y
+    anchor:
+      ref: bat_main
+      shift: [bat_sec_shift_x, bat_sec_shift_y]
+
+  trackpoint:
+    key:
+      tags: part
+      width: tp_size_x
+      height: tp_size_y
+    anchor:
+      aggregate.parts:
+        - ref: mirror_matrix_c5_r1
+        - ref: mirror_matrix_c4_r1
+        - ref: mirror_matrix_c4_r2
+      shift: [tp_shift_x, tp_shift_y]
+      rotate: tp_rotate
+  trackpoint_reset:
+    key:
+      tags: part
+      width: tp_reset_size_x
+      height: tp_reset_size_y
+    anchor:
+      ref: mcu
+      shift: [tp_reset_shift_x, tp_reset_shift_y]
+      rotate: tp_reset_rotate
+  trackpoint_pads:
+    key:
+      tags: part
+      width: tp_pads_size_x
+      height: tp_pads_size_y
+    anchor:
+      ref: trackpoint_reset
+      shift: [tp_pads_shift_x, tp_pads_shift_y]
+      rotate: tp_pads_rotate
+
+  # --------------------- Mounting Holes --------------------- #
+  hole_top_left:
+    key: &hole
+      tags: hole
+      width: hole_size
+      height: hole_size
+    anchor:
+      aggregate.parts:
+        - ref: matrix_c1_r1
+        - ref: matrix_c1_r1
+        - ref: matrix_c2_r1
+        - ref: matrix_c2_r2
+  hole_top_right:
+    key:
+      <<: *hole
+    anchor:
+      aggregate.parts:
+        - ref: mirror_matrix_c1_r1
+        - ref: mirror_matrix_c1_r1
+        - ref: mirror_matrix_c2_r1
+        - ref: mirror_matrix_c2_r2
+
+  hole_thumb_left:
+    key:
+      <<: *hole
+    anchor:
+      aggregate.parts:
+        - ref: thumb_out
+        - ref: thumb_in
+      shift: [0, hole_thumb_shift]
+  hole_thumb_right:
+    key:
+      <<: *hole
+    anchor:
+      aggregate.parts:
+        - ref: mirror_thumb_out
+        - ref: mirror_thumb_in
+      shift: [0, hole_thumb_shift]
+
+  hole_tp_stick:
+    key: &tp_hole
+      tags: tp_hole
+      width: hole_size
+      height: hole_size
+    anchor:
+      ref: trackpoint
+  hole_tp_top:
+    key:
+      <<: *tp_hole
+    anchor:
+      ref: trackpoint
+      shift: [hole_tp_shift_x, hole_tp_shift_y]
+  hole_tp_bot:
+    key:
+      <<: *tp_hole
+    anchor:
+      ref: trackpoint
+      shift: [hole_tp_shift_x, -hole_tp_shift_y]
+
+# ------------------------------------------------------------ #
+#                           OUTLINES                           #
+# ------------------------------------------------------------ #
+outlines:
+  # ------------------- Full Board Outline ------------------- #
+  _raw: &raw_outline
+    - what: rectangle
+      bound: true
+      size: [key_pad_x, key_pad_y]
+      where:
+        - /matrix_.*/
+        - /thumb_(in|out)/
+  _raw_dp:
+    - what: rectangle
+      <<: *raw_outline
+      size: [key_dpad_x, key_dpad_y]
+  _keycaps:
+    # Key outline minus .5mm to show overlapping keys.
+    - what: rectangle
+      bound: false
+      size: [key_cap_x, key_cap_y]
+      where:
+        - /matrix_.*/
+        - /thumb_(in|out)/
+  _switches:
+    - what: rectangle
+      bound: false
+      size: [key_switch_cutout_x, key_switch_cutout_y]
+      where:
+        - /matrix_.*/
+        - /thumb_(in|out)/
+
+  # -------------------- Board Components -------------------- #
+  # MCU
+  _mcu:
+    - what: rectangle
+      where: [mcu]
+      size: [mcu_size_x, mcu_size_y]
+      fillet: 1
+    - what: rectangle # USB C Connector
+      where: [mcu]
+      size: [mcu_usb_conn_size_x, mcu_usb_conn_size_y]
+      fillet: 0.1
+      operation: stack
+      adjust:
+        shift: [0, mcu_size_yo - mcu_usb_conn_size_y/2 + 0.7]
+
+  # OLED Display
+  _oled:
+    - what: rectangle
+      where: [oled]
+      size: [oled_size_x, oled_size_y]
+      fillet: 0.5
+    - what: rectangle
+      where: [oled]
+      size: [oled_jumper_x, oled_jumper_y]
+      operation: stack
+      fillet: 0.1
+      adjust:
+        shift: [0, oled_jumper_shift_y]
+  _oled_screen:
+    - what: rectangle
+      where: [oled_screen]
+      size: [oled_screen_size_x, oled_screen_size_y]
+
+  # MCU-OLED Cluster
+  _mcu_cluster:
+    - what: outline
+      name: _mcu
+      operation: stack
+    - what: outline
+      name: _oled
+      operation: stack
+    - what: outline
+      name: _oled_screen
+      operation: stack
+
+  # Power Switch
+  _power:
+    - what: rectangle
+      size: [power_size_x, power_size_y]
+      where: [power]
+    - what: rectangle # Toggle Switch
+      where: [power]
+      size: [1.25, 1.5]
+      adjust.shift: [power_size_xo, 0]
+
+  # Reset Switch
+  _reset:
+    - what: rectangle
+      size: [reset_size_x, reset_size_y]
+      where: [reset]
+
+  # JST Battery Connector
+  _jst:
+    - what: rectangle
+      size: [bat_size_x, bat_main_size_y]
+      where: [bat_main]
+    - what: rectangle
+      size: [bat_size_x, bat_sec_size_y]
+      where: [bat_sec]
+
+  # ----------------------- Trackpoint ----------------------- #
+  _tp_holes_mount:
+    - what: circle
+      where: /hole_tp_(top|bot)$/
+      radius: hole_radius_screw
+    - what: circle
+      where: /hole_tp_(top|bot)$/
+      radius: hole_radius_mount
+      operation: stack
+  _tp_stick_hole:
+    - what: circle
+      where: [trackpoint]
+      radius: hole_radius_mount
+  _tp_key_hole:
+    - what: circle
+      where: [trackpoint]
+      radius: tp_hole_radius_stick
+  _trackpoint:
+    - what: rectangle # TP Length
+      size: [tp_mount_size_x, tp_size_y]
+      where: [trackpoint]
+    - what: polygon
+      points:
+        - ref: trackpoint # Right of top mount
+          shift: [(tp_mount_size_x)/2, tp_hex_size_yo]
+        - ref: trackpoint
+          shift: [tp_size_xo, (tp_hex_side_size)/2]
+        - ref: trackpoint # Right of tp hole
+          shift: [tp_size_xo, -(tp_hex_side_size)/2]
+        - ref: trackpoint
+          shift: [(tp_mount_size_x)/2, -tp_hex_size_yo]
+        - ref: trackpoint # Left of bottom mount
+          shift: [-(tp_mount_size_x)/2, -tp_hex_size_yo]
+        - ref: trackpoint
+          shift: [-(tp_size_xo), -(tp_hex_side_size)/2]
+        - ref: trackpoint # Left of tp hole
+          shift: [-(tp_size_xo), (tp_hex_side_size)/2]
+        - ref: trackpoint
+          shift: [-(tp_mount_size_x)/2, tp_hex_size_yo]
+    - name: _tp_stick_hole
+      operation: stack
+    - name: _tp_key_hole
+      operation: stack
+    - name: _tp_holes_mount
+      operation: stack
+
+  _trackpoint_reset:
+    - what: rectangle # TP Length
+      size: [tp_reset_size_x, tp_reset_size_y]
+      where: [trackpoint_reset]
+    - what: rectangle # TP Length
+      size: [tp_pads_size_x, tp_pads_size_y]
+      where: [trackpoint_pads]
+
+  # --------------------- Mounting Holes --------------------- #
+  _holes_screw:
+    - what: circle
+      where: [hole]
+      radius: hole_radius_screw
+  _holes_standoff:
+    - what: circle
+      where: [hole]
+      radius: hole_radius_standoff
+  _holes_mount:
+    - what: circle
+      where: [hole]
+      radius: hole_radius_mount
+    - operation: stack
+      name: _holes_screw
+
+  # -------------------------- Battery ----------------------- #
+  _bat_rect:
+    - what: rectangle
+      size: [bat_rect_size_x, bat_rect_size_y]
+      adjust:
+        ref: matrix_c3_r2
+        shift: [bat_rect_shift_x, bat_rect_shift_y]
+        rotate: bat_rect_rotate
+
+  # --------------------- Unibody Bridge --------------------- #
+  _center_rect:
+    - what: rectangle
+      where:
+        ref: [mcu]
+        shift: [0, -top_rect_shift_y + 1.0]
+      size: [6.25(key_size_x), mcu_size_y + 2(top_rect_shift_y)]
+
+  _center_rect_dp:
+    - what: rectangle
+      where:
+        ref: [mcu]
+        shift: [0, -top_rect_shift_y + 3.5]
+      size: [6.25(key_size_x), mcu_size_y + 2(top_rect_shift_y)]
+
+  _bottom_arc:
+    - what: circle
+      radius: bot_crcl_radius
+      where:
+        ref: ref_bottom_center
+        shift: [bot_crcl_shift_x, bot_crcl_shift_y]
+
+  _bottom_arc_dp:
+    - what: circle
+      radius: bot_crcl_radius - 2
+      where:
+        ref: ref_bottom_center
+        shift: [bot_crcl_shift_x, bot_crcl_shift_y]
+
+  _panel:
+    - name: _center_rect
+      fillet: 3 # The inner rounding where the glue meets the top center keys
+    - _raw
+    - operation: subtract
+      name: _bottom_arc
+      fillet: 1.5
+  panel:
+    - name: _panel
+      fillet: 1.5
+    # - name: _holes_standoff
+
+  panel_xl:
+    - name: _center_rect_dp
+      fillet: 3 # The inner rounding where the glue meets the top center keys
+    - name: _raw_dp
+    - operation: subtract
+      name: _bottom_arc_dp
+      fillet: 1.5
+
+  panel_dp:
+    - name: panel_xl
+    - operation: stack
+      name: panel
+
+  # ---------------------- DXF PREVIEWS ---------------------- #
+  # Pure key outline with nice!nano MCU
+  _raw_keys:
+    - name: _raw
+    - operation: stack
+      name: _keycaps
+  _components:
+    - name: _mcu_cluster
+      operation: stack
+    - name: _power
+      operation: stack
+    - name: _jst
+      operation: stack
+    - name: _reset
+      operation: stack
+    - name: _trackpoint
+      operation: stack
+    - name: _trackpoint_reset
+      operation: stack
+  _mount_holes:
+    - operation: stack
+      name: _holes_mount
+    - operation: stack
+      name: _tp_stick_hole
+
+  # Rufous
+  demo_switches:
+    - panel
+    - ^_switches
+    - ^_components
+    - ^_holes_screw
+  demo_keycaps:
+    - panel
+    - ^_keycaps
+    - ^_components
+    - ^_mount_holes
+  demo_key_switch:
+    - panel
+    - ^_switches
+    - ^_keycaps
+    - ^_components
+    - ^_mount_holes
+  switchplate:
+    - panel
+    - operation: subtract
+      name: _switches
+      fillet: 0.5
+    - operation: subtract
+      name: _holes_screw
+    - operation: subtract
+      name: _tp_stick_hole
+    - operation: subtract
+      name: _oled_screen
+
+  plate_opening:
+    - name: _power
+    - name: _reset
+
+# ------------------------------------------------------------ #
+#                              PCB                             #
+# ------------------------------------------------------------ #
+pcbs.jacked_rufous:
+  template: kicad8
+  outlines:
+    main.outline: panel
+    plate_top:
+      outline: switchplate
+      layer: Eco1.User
+    plate_bottom:
+      outline: panel
+      layer: Eco2.User
+  footprints:
+    # --------------------- Key Switches --------------------- #
+    key_switch:
+      what: ceoloide/switch_choc_v1_v2
+      where:
+        - /matrix_/
+        - /thumb_(in|out)/
+      adjust.rotate: key_rotate
+      params:
+        include_stabilizer_pad: false
+        from: "{{column_net}}"
+        to: "{{colrow}}"
+
+    # ------------------------ Diodes ------------------------ #
+    diode:
+      what: ceoloide/diode_tht_sod123
+      where:
+        - /matrix/
+        - /thumb_(in|out)/
+      adjust:
+        rotate: diode_matrix_rotate
+        shift: [-diode_shift_x, diode_shift_y]
+      params:
+        from: "{{colrow}}"
+        to: "{{row_net}}"
+        side: "B"
+        reversible: false
+        include_tht: false
+        # include_traces_vias: true
+        # trace_distance: { type: 'number', value: 1.2 }
+
+    # -------------------- Diode Via Holes ------------------- #
+    diode_row_net_via: &diode_via_matrix
+      what: via
+      where:
+        - /^matrix/
+        - /^thumb_(in|out)/
+      adjust.shift: [diode_via_shift_x, diode_via_shift_y]
+      params.net: "{{row_net}}"
+    diode_colrow_via:
+      <<: *diode_via_matrix
+      adjust.shift: [-diode_via_shift_x, diode_via_shift_y]
+      params.net: "{{colrow}}"
+
+    diode_row_net_mirror_via: &diode_via_mirror
+      what: via
+      where:
+        - /mirror_matrix/
+        - /mirror_thumb_(in|out)/
+      adjust.shift: [-diode_via_shift_x, diode_via_shift_y]
+      params.net: "{{row_net}}"
+    diode_colrow_mirror_via:
+      <<: *diode_via_mirror
+      adjust.shift: [diode_via_shift_x, diode_via_shift_y]
+      params.net: "{{colrow}}"
+
+    # thumb_row_net_via:
+    #   what: via
+    #   where: [thumb_out]
+    #   adjust.shift: [hole_thumb_shift, hole_thumb_shift]
+    #   params.net: "{{row_net}}"
+    # via_thumb_col_net:
+    #   what: via
+    #   where: /thumb_/
+    #   adjust.shift: [-8.5, 8.5]
+    #   params.net: "{{column_net}}"
+
+    # --------------------------- MCU -------------------------- #
+    mcu:
+      what: ceoloide/mcu_nice_nano
+      where.ref: mcu
+      params:
+        side: B
+        reversible: true
+        invert_jumpers_position: false
+        only_required_jumpers: true
+        use_rectangular_jumpers: true
+        via_size: 0.8 # JLCPC min is 0.56 for 1-2 layer boards, KiCad defaults to 0.8
+        via_drill: 0.4 # JLCPC min is 0.3 for 1-2 layer boards, KiCad defaults to 0.4
+
+        show_instructions: true
+        show_silk_labels: true
+        show_silk_labels_on_both_sides: true
+        show_via_labels: true
+
+        # Pin Assignments (Controller on top facing down)
+        # Right Side - Excluding P8/9, all high frequency and support SPI/I2C
+        P1: TPC # Trackpoint Data
+        P0: TPD # Trackpoint Clock
+        # GND
+        # GND
+        P2: R1 # Row Top - Left
+        P3: R2 # Row Middle - Left
+        P4: "" # SW1 # Scroll Wheel
+        P5: "" # SW2 # Scroll Wheel
+        P6: MOSI # MOSI: Display Data
+        P7: SCK # SCK: Display Clock
+        P8: CS # Display CS (nice!view only)
+        P9: R3 # Row Bottom Thumb
+
+        # Left Side - All low frequency
+        # RAW       # Battery Pos
+        # GND       # Ground / Battery Neg
+        # RST       # Reset pin
+        # VCC       # External Power
+        P21: R4 # Row Top - Right
+        P20: R5 # Row Middle - Right
+        P19: C1 # Pinky Column
+        P18: C2 # Ring Column
+        P15: C3 # Middle Column
+        P14: C4 # Index Column
+        P16: C5 # FREE PIN
+        P10: R6 # FREE PIN
+
+    # ---------------------- OLED Display ---------------------- #
+    oled:
+      what: ceoloide/display_nice_view
+      where: oled
+      params:
+        side: F
+        reversible: false
+        include_traces: true
+        gnd_trace_width: 0.25
+        signal_trace_width: 0.25
+        invert_jumpers_position: false
+        include_labels: true
+        invert_labels_position: true
+        MOSI: MOSI # DPD
+        SCK: SCK # DPC
+        CS: CS # DPE
+
+    # --------------------- Power Switch --------------------- #
+    power:
+      what: ceoloide/power_switch_smd_side
+      where: [power]
+      params:
+        from: pos
+        to: RAW
+        side: F
+        reversible: false
+        invert_behavior: false
+        include_silkscreen: true
+        include_courtyard: false
+    power_pos_via: # left side of pwr switch
+      what: via
+      where: [power]
+      adjust.shift: [0.5(power_size_xo), 0]
+      params.net: pos
+
+    # --------------------- Reset Button --------------------- #
+    reset:
+      what: ceoloide/reset_switch_smd_side #switch_reset
+      where: [reset]
+      params:
+        from: GND
+        to: RST
+        reversible: true
+        include_bosses: true
+        include_silkscreen: true
+        include_courtyard: false
+    reset_rst_via: &reset_via # left side
+      what: via
+      where: [reset]
+      adjust.shift: [reset_via_shift_x, -(reset_via_shift_y)]
+      params.net: RST
+    reset_gnd_via: # right side
+      <<: *reset_via
+      adjust.shift: [reset_via_shift_x, reset_via_shift_y]
+      params.net: GND
+
+    # ----------------- JST Battery Connector ---------------- #
+    bat_connector:
+      what: ceoloide/battery_connector_jst_ph_2
+      where: [bat_main]
+      params:
+        reversible: true
+        include_traces: true
+        trace_width: 0.250
+        include_silkscreen: true
+        include_fabrication: true
+        include_courtyard: false
+        BAT_P: pos
+        BAT_N: GND
+    bat_pos_via: &bat_via
+      what: via
+      where: [bat_main]
+      adjust.shift: [0, bat_pos_via_shift_y]
+      params.net: pos
+    bat_gnd_via:
+      <<: *bat_via
+      adjust.shift: [0, bat_gnd_via_shift_y]
+      params.net: GND
+
+    # ---------------------- Scrollwheel --------------------- #
+    # scrollwheel:
+    #   what: scrollwheel #scrollwheel_minimal
+    #   where:
+    #     ref: matrix_c5_r1
+    #     shift: [1.1, 0.875]
+    #     rotate: 180
+    #   params:
+    #     reverse: true
+    #     from: C5
+    #     to: R1
+    #     A: SW1
+    #     B: GND
+    #     C: SW2
+    #     D: ''
+
+    # ---------------------- Trackpoint ---------------------- #
+    trackpoint:
+      what: infused-kim/trackpoint_mount
+      where:
+        ref: trackpoint
+        rotate: tp_rotate
+      params:
+        reverse: true
+        # T430: 3.5
+        # T460S (red one): 3.5
+        # X240: 5.5
+        drill: 3.5
+        outline: 0.25
+
+        show_outline_t430: false
+        show_outline_x240: false
+        show_outline_t460s: true
+        show_board: false
+
+    tp_reset_circuit:
+      what: infused-kim/smd_0805
+      where: trackpoint_reset
+      params:
+        reverse: false
+        space: 1
+        mirror: true
+        label_at_bottom: true
+        swap_pad_direction: true
+        components: 4
+
+        # TP clock pull up resistor 4.7k
+        net_1_from: TPC
+        net_1_to: VCC
+        label_1: TCR
+
+        # TP Reset circuit resistor 100k
+        net_2_from: TPR
+        net_2_to: GND
+        label_2: TRR
+
+        # TP Reset circuit capacitor 2.2uF
+        net_3_from: TPR
+        net_3_to: VCC
+        label_3: TRC
+
+        # TP data pull up resistor 4.7k
+        net_4_from: TPD
+        net_4_to: VCC
+        label_4: TDR
+
+    tp_pads:
+      what: infused-kim/pads
+      where: trackpoint_pads
+      params:
+        reverse: false
+        width: 1
+        height: 2
+        space: 1
+        pads: 5
+
+        net_1: TPC
+        net_2: GND
+        net_3: TPR
+        net_4: TPD
+        net_5: VCC
+
+        label_1: SCL
+        label_2: GND
+        label_3: RST
+        label_4: SDA
+        label_5: VCC
+        label_at_bottom: true
+
+    # -------------------- M2 Screw Holes -------------------- #
+    holes_mount:
+      what: ceoloide/mounting_hole_plated
+      where: [hole]
+      #include_courtyard: false
+
+    # --------------------- Trace Routes --------------------- #
+    key_diode_row_net_route:
+      what: ceoloide/utility_router
+      where: [key]
+      params:
+        net: "{{row_net}}"
+        routes: [
+            # Hotswap diaganol to stabilizer hole
+            "b(-8.275, 3.75)(-6.421, 1.875)",
+            # Horizontal line above stabilizer hole
+            "b(-6.421, 1.875)(-4.0, 1.875)",
+            "b(-4.0, 1.875)(-3.0, 0.875)",
+            "b(-3.0, 0.875)(-3.0, -1.75)",
+            "b(-3.0, -1.75)(-1.5,-3.5)",
+          ]
+
+    diode_via_row_net_route:
+      what: ceoloide/utility_router
+      where: [key]
+      params:
+        net: "{{row_net}}"
+        route: "b(-1.5,-3.5)(-2.5,-3.5)"
+
+    diode_via_colrow_route:
+      what: ceoloide/utility_router
+      where: [key]
+      params:
+        net: "{{colrow}}"
+        route: "b(1.5,-3.5)(2.5,-3.5)"
+
+    key_column_net_r2_route:
+      what: ceoloide/utility_router
+      where: /.*r2$/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(3.25, 5.875)(3.5, 5.125)",
+            "b(3.5, 5.125)(3.5, -10.5)",
+            "b(3.5, -10.5)(3.25, -11.125)",
+          ]
+
+    key_column_net_matrix_r3_route:
+      what: ceoloide/utility_router
+      where: /^matrix.*r3$/
+      params:
+        net: "{{column_net}}"
+        route: "b(4.1,6.0)(2.1,8)(-7.75,8)(-9.5,6.5)" # (-10.25,4.5)
+
+    key_column_net_matrix_c2_r3_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c2_r3/
+      params:
+        net: "{{column_net}}"
+        route: "b(-9.5,6.5)(-10.5,4.25)(-14.5,1.5)"
+
+    key_column_net_matrix_c3_r3_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c3_r3/
+      params:
+        net: "{{column_net}}"
+        route: "b(-9.5,6.5)(-15.75,-5)"
+
+    key_column_net_matrix_c4_r3_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c4_r3/
+      params:
+        net: "{{column_net}}"
+        route: "b(-9.5,6.5)(-10,5)(-10.5,3.5)(-12.5,0)(-14,-4.25)(-14.5,-7.25)(-14.5,-18)"
+
+# ------------------------------------------------------------ #
+#                             CASES                            #
+# ------------------------------------------------------------ #
+cases:
+  switchplate:
+    - name: switchplate
+      extrude: 1
+  bottom:
+    - name: panel
+      extrude: 1
+  bottom_xl:
+    - name: panel_xl
+      extrude: 1
+  _outerWall:
+    - name: panel_xl
+      extrude: 4
+  _innerWall:
+    - name: panel
+      extrude: 4
+  wall:
+    - what: case
+      name: _outerWall
+      operation: add
+    - what: case
+      name: _innerWall
+      operation: subtract
+  case:
+    - what: case
+      name: bottom_xl
+      operation: add
+    - what: case
+      name: wall
+      operation: add
