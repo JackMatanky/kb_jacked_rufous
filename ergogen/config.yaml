@@ -1038,10 +1038,11 @@ pcbs.jacked_rufous:
 
     # ------------------ MCU ------------------- #
     mcu:
-      what: xiao_plus
+      what: mcu_xiao_nrf52840_plus
       where: mcu
+      # the footprint origin is the pad-row centre, 0.075 mm off the old xiao_plus origin
+      adjust.shift: [0, -0.075]
       params:
-        reverse_mount: false
         reversible: false
 
         # Required internal pad groups
