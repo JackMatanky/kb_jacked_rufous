@@ -4,7 +4,8 @@
 //
 // To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
 //
-// Author: @infused-kim + @ceoloide improvements
+// Author: @infused-kim (original smd_0805 footprint), @JackMatanky (0805 land
+// pattern rebuild with TrackPoint defaults and embedded hub routing)
 //
 // Description:
 //   A parametric multi-component 0805 SMD footprint supporting up to 6 side-by-side
