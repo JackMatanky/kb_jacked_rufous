@@ -236,7 +236,7 @@ units:
   mcu_shift_y: -power_size_x # Adjust vertical shift for XIAO length
 
   # --------------- OLED Display --------------- #
-  oled_shift_x: 0
+  oled_shift_x: -(oled_screen_offset_x)/2
   oled_shift_y: mcu_size_yo - (oled_size_yo + oled_jumper_y + 1)
 
   # OLED vias
@@ -249,8 +249,8 @@ units:
 
   # --------------- Power Switch --------------- #
   power_shift_x: 0 #0.9
-  power_shift_y: power_size_x - 0.5
-  power_rotate: 90
+  power_shift_y: -(28.5 + power_size_x - 0.5)
+  power_rotate: -90
 
   # ---------- JST Battery Connector ----------- #
   bat_main_shift_x: -(bat_size_x + mcu_size_xo)
@@ -263,12 +263,9 @@ units:
   bat_gnd_via_shift_y: bat_main_size_yo - 0.5
 
   # --------------- Reset Switch --------------- #
-  reset_shift_x: 0
+  reset_shift_x: power_size_y
   reset_shift_y: -(29 + reset_size_y)
   reset_rotate: 180 # 270 + 52
-
-  reset_via_shift_x: 3(reset_size_x)/4
-  reset_via_shift_y: (reset_size_yo)/2
 
   # ---------------- Trackpoint ---------------- #
   tp_size_x: 12.5
@@ -997,33 +994,45 @@ pcbs.jacked_rufous:
         side: "B"
         reversible: false
         include_tht: false
-        # include_traces_vias: true
-        # trace_distance: { type: 'number', value: 1.2 }
+
+    diode_via_row_net_route:
+      what: ceoloide/utility_router
+      where: [key]
+      params:
+        net: "{{row_net}}"
+        route: "b(-1.5, -3.5)(-2.75, -3.5)v(-2.75, -3.5)"
+
+    diode_via_colrow_route:
+      what: ceoloide/utility_router
+      where: [key]
+      params:
+        net: "{{colrow}}"
+        route: "b(1.5, -3.5)(2.75, -3.5)v(2.75, -3.5)"
 
     # ------------ Diode Via Holes ------------- #
-    diode_row_net_via: &diode_via_matrix
-      what: via
-      where:
-        - /^matrix/
-        - /^thumb_(in|out)/
-      adjust.shift: [diode_via_shift_x, diode_via_shift_y]
-      params.net: "{{row_net}}"
-    diode_colrow_via:
-      <<: *diode_via_matrix
-      adjust.shift: [-diode_via_shift_x, diode_via_shift_y]
-      params.net: "{{colrow}}"
+    # diode_row_net_via: &diode_via_matrix
+    #   what: via
+    #   where:
+    #     - /^matrix/
+    #     - /^thumb_(in|out)/
+    #   adjust.shift: [diode_via_shift_x, diode_via_shift_y]
+    #   params.net: "{{row_net}}"
+    # diode_colrow_via:
+    #   <<: *diode_via_matrix
+    #   adjust.shift: [-diode_via_shift_x, diode_via_shift_y]
+    #   params.net: "{{colrow}}"
 
-    diode_row_net_mirror_via: &diode_via_mirror
-      what: via
-      where:
-        - /mirror_matrix/
-        - /mirror_thumb_(in|out)/
-      adjust.shift: [-diode_via_shift_x, diode_via_shift_y]
-      params.net: "{{row_net}}"
-    diode_colrow_mirror_via:
-      <<: *diode_via_mirror
-      adjust.shift: [diode_via_shift_x, diode_via_shift_y]
-      params.net: "{{colrow}}"
+    # diode_row_net_mirror_via: &diode_via_mirror
+    #   what: via
+    #   where:
+    #     - /mirror_matrix/
+    #     - /mirror_thumb_(in|out)/
+    #   adjust.shift: [-diode_via_shift_x, diode_via_shift_y]
+    #   params.net: "{{row_net}}"
+    # diode_colrow_mirror_via:
+    #   <<: *diode_via_mirror
+    #   adjust.shift: [diode_via_shift_x, diode_via_shift_y]
+    #   params.net: "{{colrow}}"
 
     # thumb_row_net_via:
     #   what: via
@@ -1043,12 +1052,13 @@ pcbs.jacked_rufous:
       # the footprint origin is the pad-row centre, 0.075 mm off the old xiao_plus origin
       adjust.shift: [0, -0.075]
       params:
-        reversible: false
+        reversible: true
 
         # Required internal pad groups
         include_main_pads: true
         include_battery_pads: true
         include_battery_cutouts: true
+        include_interconnect_traces: true
 
         # TrackPoint PS/2
         D0: TPD
@@ -1108,7 +1118,7 @@ pcbs.jacked_rufous:
         from: pos
         to: RAW
         side: F
-        reversible: false
+        reversible: true
         invert_behavior: false
         include_silkscreen: true
         include_courtyard: false
@@ -1117,6 +1127,27 @@ pcbs.jacked_rufous:
       where: [power]
       adjust.shift: [0.5(power_size_xo), 0]
       params.net: pos
+
+    power_pos_route:
+      what: ceoloide/utility_router
+      where: [power]
+      params:
+        net: pos
+        routes:
+          [
+            "f(-1.75, 2.0)(-0.7, 1.25)",
+            "f(-0.7, 1.25)(-0.7, 0)v(-0.7, 0)",
+            "b(-0.7, 0)(-0.7, -1.25)",
+            "b(-0.7, -1.25)(-1.75, -2.0)",
+          ]
+
+    power_raw_route:
+      what: ceoloide/utility_router
+      where: [power]
+      params:
+        net: RAW
+        routes:
+          ["b(-1.75, 0.5)(-1.75, 0)v(-1.75, 0)", "f(-1.75, 0)(-1.75, -0.5)"]
 
     # -------------- Reset Button -------------- #
     reset:
@@ -1129,15 +1160,32 @@ pcbs.jacked_rufous:
         include_bosses: true
         include_silkscreen: true
         include_courtyard: false
-    reset_rst_via: &reset_via # left side
-      what: via
+
+    reset_rst_route:
+      what: ceoloide/utility_router
       where: [reset]
-      adjust.shift: [reset_via_shift_x, -(reset_via_shift_y)]
-      params.net: RST
-    reset_gnd_via: # right side
-      <<: *reset_via
-      adjust.shift: [reset_via_shift_x, reset_via_shift_y]
-      params.net: GND
+      params:
+        net: RST
+        routes:
+          [
+            "f(-2.5, 0.8)(-0.75, 0.8)",
+            "f(-0.75, 0.8)(0, 0.45)v(0, 0.45)",
+            "b(0, 0.45)(0.75, 0.8)",
+            "b(0.75, 0.8)(2.5, 0.8)",
+          ]
+
+    reset_gnd_route:
+      what: ceoloide/utility_router
+      where: [reset]
+      params:
+        net: GND
+        routes:
+          [
+            "b(-2.5, -0.8)(-0.75, -0.8)",
+            "b(-0.75, -0.8)(0, -0.45)v(0, -0.45)",
+            "f(0, -0.45)(0.75, -0.8)",
+            "f(0.75, -0.8)(2.5, -0.8)",
+          ]
 
     # --------- JST Battery Connector ---------- #
     bat_connector:
@@ -1152,15 +1200,32 @@ pcbs.jacked_rufous:
         include_courtyard: false
         BAT_P: pos
         BAT_N: GND
-    bat_pos_via: &bat_via
-      what: via
+
+    bat_pos_route:
+      what: ceoloide/utility_router
       where: [bat_main]
-      adjust.shift: [0, bat_pos_via_shift_y]
-      params.net: pos
-    bat_gnd_via:
-      <<: *bat_via
-      adjust.shift: [0, bat_gnd_via_shift_y]
-      params.net: GND
+      params:
+        net: pos
+        routes:
+          [
+            "f(-0.9, 2.5)(-0.9, 3.0)",
+            "f(-0.9, 3.0)(0, 3.5)v(0, 3.5)",
+            "b(0, 3.5)(0.9, 3.0)",
+            "b(0.9, 3.0)(0.9, 2.5)",
+          ]
+
+    bat_gnd_route:
+      what: ceoloide/utility_router
+      where: [bat_main]
+      params:
+        net: GND
+        routes:
+          [
+            "b(-0.9, 2.5)(0, 1.5)",
+            "b(0, 1.5)(0, -1.25)v(0, -1.25)",
+            "f(0, -1.25)(0, 1.5)",
+            "f(0, 1.5)(0.9, 2.5)",
+          ]
 
     # -------------- Scrollwheel --------------- #
     # scrollwheel:
@@ -1274,32 +1339,6 @@ pcbs.jacked_rufous:
       #include_courtyard: false
 
     # -------------- Trace Routes -------------- #
-    reset_rst_route:
-      what: ceoloide/utility_router
-      where: [reset]
-      params:
-        net: RST
-        routes:
-          [
-            "f(-2.5, 0.8)(-0.75, 0.8)",
-            "f(-0.75, 0.8)(0, 0.5)v(0, 0.5)",
-            "b(0, 0.5)(0.75, 0.8)",
-            "b(0.75, 0.8)(2.5, 0.8)",
-          ]
-
-    reset_gnd_route:
-      what: ceoloide/utility_router
-      where: [reset]
-      params:
-        net: GND
-        routes:
-          [
-            "b(-2.5, -0.8)(-0.75, -0.8)",
-            "b(-0.75, -0.8)(0, -0.5)v(0, -0.5)",
-            "f(0, -0.5)(0.75, -0.8)",
-            "f(0.75, -0.8)(2.5, -0.8)",
-          ]
-
     key_diode_row_net_route:
       what: ceoloide/utility_router
       where: [key]
@@ -1312,22 +1351,8 @@ pcbs.jacked_rufous:
             "b(-6.421, 1.875)(-4.0, 1.875)",
             "b(-4.0, 1.875)(-3.0, 0.875)",
             "b(-3.0, 0.875)(-3.0, -1.75)",
-            "b(-3.0, -1.75)(-1.5,-3.5)",
+            "b(-3.0, -1.75)(-1.5, -3.5)",
           ]
-
-    diode_via_row_net_route:
-      what: ceoloide/utility_router
-      where: [key]
-      params:
-        net: "{{row_net}}"
-        route: "b(-1.5, -3.5)(-2.5, -3.5)"
-
-    diode_via_colrow_route:
-      what: ceoloide/utility_router
-      where: [key]
-      params:
-        net: "{{colrow}}"
-        route: "b(1.5, -3.5)(2.5, -3.5)"
 
     key_column_net_r2_route:
       what: ceoloide/utility_router
