@@ -156,14 +156,15 @@ presets:
       oled_jumper_x: 12.82
       oled_jumper_y: 2.66
       oled_jumper_shift_y: -16.7
-      # Screen Size and Offset From Center
+      # nice!view Screen Size: 25.3 x 10.8 (mm)
+      oled_screen_size_x: 10.8 # 14 - 1.6 - 1.6
+      oled_screen_size_y: 25.3 # 36 - (2.45 + 3.65) - (1.3 + 1.7 + 1.6)
+      oled_screen_size_xo: 0.5(oled_screen_size_x)
+      oled_screen_size_yo: 0.5(oled_screen_size_y)
+      # Screen Offset From Center
       oled_screen_offset_x: 1.6
       oled_screen_offset_top_y: 2.45 + 3.65 # = 6.1
       oled_screen_offset_bot_y: 1.3 + 1.7 + 1.6 # = 4.6
-      oled_screen_size_x: oled_size_x - 2(oled_screen_offset_x)
-      oled_screen_size_y: oled_size_y - (oled_screen_offset_top_y + oled_screen_offset_bot_y)
-      oled_screen_size_xo: 0.5(oled_screen_size_x)
-      oled_screen_size_yo: 0.5(oled_screen_size_y)
       oled_screen_shift_x: 0
       oled_screen_shift_y: oled_size_y/2 - (oled_screen_size_yo + oled_screen_offset_top_y)
 
@@ -220,6 +221,10 @@ units:
   thumb_out_splay: -12
   thumb_in_splay: -13
   thumb_in_spread: key_size_x + 1.75
+  thumb_in_bind_top: 1.5(key_size_y)
+  thumb_in_bind_right: key_size_x
+  thumb_in_bind_bot: 0
+  thumb_in_bind_left: 0
 
   diode_via_shift_x: diode_size_yo + 0.6
   diode_via_shift_y: diode_shift_y
@@ -259,9 +264,6 @@ units:
   bat_sec_shift_y: -(bat_main_size_yo + bat_sec_size_yo)
   bat_rotate: 0
 
-  bat_pos_via_shift_y: -(bat_size_yo - 1.5)
-  bat_gnd_via_shift_y: bat_main_size_yo - 0.5
-
   # --------------- Reset Switch --------------- #
   reset_shift_x: power_size_y
   reset_shift_y: -(29 + reset_size_y)
@@ -292,12 +294,12 @@ units:
   tp_reset_shift_y: mcu_size_y/3
   tp_reset_rotate: 180
 
-  # TP Pads
-  tp_pads_size_x: 9
-  tp_pads_size_y: 2
-  tp_pads_shift_x: 0
-  tp_pads_shift_y: 3(tp_pads_size_y)
-  tp_pads_rotate: 180
+  # TP FFC connector (Molex 2005280120)
+  tp_ffc_size_x: 18
+  tp_ffc_size_y: 5.3
+  tp_ffc_shift_x: 0
+  tp_ffc_shift_y: -mcu_size_y
+  tp_ffc_rotate: 0 # connector +y (ribbon side) must face the stick
 
   # ------------- PCB & Case Holes ------------- #
   # Points height and width
@@ -314,16 +316,16 @@ units:
 
   # -------------- Board Outline --------------- #
   # >>> Unibody Bridge <<<
-  top_rect_shift_y: 14.75
+  top_rect_shift_y: 14.5
 
   # Circle
   bot_crcl_radius: 80
   bot_crcl_shift_x: 0
-  bot_crcl_shift_y: -(bot_crcl_radius) + 10
+  bot_crcl_shift_y: -(bot_crcl_radius) + 10 # 14 (MX)
 
   # ------------ Battery Rectangle ------------- #
-  bat_rect_size_x: 60
-  bat_rect_size_y: 50
+  bat_rect_size_x: 50
+  bat_rect_size_y: 40
   bat_rect_shift_x: 2.5
   bat_rect_shift_y: -6.75
   bat_rect_rotate: 0
@@ -485,7 +487,13 @@ points.zones:
         stagger: thumb_col_stagger
         spread: thumb_in_spread
         splay: thumb_in_splay
-        bind: [1.5(key_size_y), key_size_y/3, 0, 0]
+        bind:
+          [
+            thumb_in_bind_top,
+            thumb_in_bind_right,
+            thumb_in_bind_bot,
+            thumb_in_bind_left,
+          ]
         column_net: C5
         mirror.column_net: C5
 
@@ -591,15 +599,15 @@ points.zones:
       ref: mcu
       shift: [tp_reset_shift_x, tp_reset_shift_y]
       rotate: tp_reset_rotate
-  trackpoint_pads:
+  trackpoint_ffc:
     key:
       tags: part
-      width: tp_pads_size_x
-      height: tp_pads_size_y
+      width: tp_ffc_size_x
+      height: tp_ffc_size_y
     anchor:
-      ref: trackpoint_reset
-      shift: [tp_pads_shift_x, tp_pads_shift_y]
-      rotate: tp_pads_rotate
+      ref: mcu
+      shift: [tp_ffc_shift_x, tp_ffc_shift_y]
+      rotate: tp_ffc_rotate
 
   # -------------- Mounting Holes -------------- #
   hole_top_left:
@@ -812,9 +820,9 @@ outlines:
     - what: rectangle # TP Length
       size: [tp_reset_size_x, tp_reset_size_y]
       where: [trackpoint_reset]
-    - what: rectangle # TP Length
-      size: [tp_pads_size_x, tp_pads_size_y]
-      where: [trackpoint_pads]
+    - what: rectangle # TP FFC connector
+      size: [tp_ffc_size_x, tp_ffc_size_y]
+      where: [trackpoint_ffc]
 
   # -------------- Mounting Holes -------------- #
   _holes_screw:
@@ -994,56 +1002,18 @@ pcbs.jacked_rufous:
         side: "B"
         reversible: false
         include_tht: false
-
     diode_via_row_net_route:
       what: ceoloide/utility_router
       where: [key]
       params:
         net: "{{row_net}}"
         route: "b(-1.5, -3.5)(-2.75, -3.5)v(-2.75, -3.5)"
-
     diode_via_colrow_route:
       what: ceoloide/utility_router
       where: [key]
       params:
         net: "{{colrow}}"
         route: "b(1.5, -3.5)(2.75, -3.5)v(2.75, -3.5)"
-
-    # ------------ Diode Via Holes ------------- #
-    # diode_row_net_via: &diode_via_matrix
-    #   what: via
-    #   where:
-    #     - /^matrix/
-    #     - /^thumb_(in|out)/
-    #   adjust.shift: [diode_via_shift_x, diode_via_shift_y]
-    #   params.net: "{{row_net}}"
-    # diode_colrow_via:
-    #   <<: *diode_via_matrix
-    #   adjust.shift: [-diode_via_shift_x, diode_via_shift_y]
-    #   params.net: "{{colrow}}"
-
-    # diode_row_net_mirror_via: &diode_via_mirror
-    #   what: via
-    #   where:
-    #     - /mirror_matrix/
-    #     - /mirror_thumb_(in|out)/
-    #   adjust.shift: [-diode_via_shift_x, diode_via_shift_y]
-    #   params.net: "{{row_net}}"
-    # diode_colrow_mirror_via:
-    #   <<: *diode_via_mirror
-    #   adjust.shift: [diode_via_shift_x, diode_via_shift_y]
-    #   params.net: "{{colrow}}"
-
-    # thumb_row_net_via:
-    #   what: via
-    #   where: [thumb_out]
-    #   adjust.shift: [hole_thumb_shift, hole_thumb_shift]
-    #   params.net: "{{row_net}}"
-    # via_thumb_col_net:
-    #   what: via
-    #   where: /thumb_/
-    #   adjust.shift: [-8.5, 8.5]
-    #   params.net: "{{column_net}}"
 
     # ------------------ MCU ------------------- #
     mcu:
@@ -1122,12 +1092,6 @@ pcbs.jacked_rufous:
         invert_behavior: false
         include_silkscreen: true
         include_courtyard: false
-    power_pos_via: # left side of pwr switch
-      what: via
-      where: [power]
-      adjust.shift: [0.5(power_size_xo), 0]
-      params.net: pos
-
     power_pos_route:
       what: ceoloide/utility_router
       where: [power]
@@ -1135,19 +1099,16 @@ pcbs.jacked_rufous:
         net: pos
         routes:
           [
-            "f(-1.75, 2.0)(-0.7, 1.25)",
-            "f(-0.7, 1.25)(-0.7, 0)v(-0.7, 0)",
-            "b(-0.7, 0)(-0.7, -1.25)",
-            "b(-0.7, -1.25)(-1.75, -2.0)",
+            "f(-1.75, 2.25)(-0.65, 2.25)v(-0.65, 2.25)",
+            "b(-0.65, 2.25)(-1.75, 2.25)",
           ]
-
     power_raw_route:
       what: ceoloide/utility_router
       where: [power]
       params:
         net: RAW
         routes:
-          ["b(-1.75, 0.5)(-1.75, 0)v(-1.75, 0)", "f(-1.75, 0)(-1.75, -0.5)"]
+          ["b(-1.75, 0.75)(-1.75, 0)v(-1.75, 0)", "f(-1.75, 0)(-1.75, -0.75)"]
 
     # -------------- Reset Button -------------- #
     reset:
@@ -1160,7 +1121,6 @@ pcbs.jacked_rufous:
         include_bosses: true
         include_silkscreen: true
         include_courtyard: false
-
     reset_rst_route:
       what: ceoloide/utility_router
       where: [reset]
@@ -1173,7 +1133,6 @@ pcbs.jacked_rufous:
             "b(0, 0.45)(0.75, 0.8)",
             "b(0.75, 0.8)(2.5, 0.8)",
           ]
-
     reset_gnd_route:
       what: ceoloide/utility_router
       where: [reset]
@@ -1206,13 +1165,7 @@ pcbs.jacked_rufous:
       where: [bat_main]
       params:
         net: pos
-        routes:
-          [
-            "f(-0.9, 2.5)(-0.9, 3.0)",
-            "f(-0.9, 3.0)(0, 3.5)v(0, 3.5)",
-            "b(0, 3.5)(0.9, 3.0)",
-            "b(0.9, 3.0)(0.9, 2.5)",
-          ]
+        routes: ["f(-1.0, 2.82)(0, 3.7)v(0, 3.7)", "b(0, 3.7)(1.0, 2.82)"]
 
     bat_gnd_route:
       what: ceoloide/utility_router
@@ -1221,10 +1174,10 @@ pcbs.jacked_rufous:
         net: GND
         routes:
           [
-            "b(-0.9, 2.5)(0, 1.5)",
+            "b(-1.0, 2.82)(0, 1.5)",
             "b(0, 1.5)(0, -1.25)v(0, -1.25)",
             "f(0, -1.25)(0, 1.5)",
-            "f(0, 1.5)(0.9, 2.5)",
+            "f(0, 1.5)(1.0, 2.82)",
           ]
 
     # -------------- Scrollwheel --------------- #
@@ -1245,22 +1198,28 @@ pcbs.jacked_rufous:
 
     # --------------- Trackpoint --------------- #
     tp_stick:
-      what: trackpoint_stick
+      what: trackpoint_mount # trackpoint_stick
       where:
         ref: trackpoint
         rotate: 180
       params:
-        model: t460s
         side: F
-        reversible: true
-        include_mounting_holes: false
-        pad_x: 19
-        pad_y: 0.75
-        pad_r: 0
-        A: VCC
-        B: GND
-        C: TPD
-        D: TPC
+        model: t460s
+        # reversible: false
+        # include_mounting_holes: false
+        # include_pads: false # the FFC connector carries the signals now
+
+    tp_ffc:
+      what: conn_ffc_molex_12p
+      where: trackpoint_ffc
+      params:
+        side: F # fingers face the PCB (bottom contact); confirm with the ribbon
+        reversible: false
+        pin_1: VCC
+        pin_2: TPD
+        pin_3: TPR
+        pin_7: GND
+        pin_8: TPC
 
     tp_reset:
       what: trackpoint_reset
