@@ -1,10 +1,10 @@
-// Copyright (c) 2023 Marco Massarelli
+// Copyright (c) 2026 Jack Matanky
 //
-// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// SPDX-License-Identifier: MIT
 //
-// To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+// To view a copy of this license, visit https://opensource.org/licenses/MIT
 //
-// Author: @infused-kim, expanded by @ceoloide and contributors
+// Author: @JackMatanky
 //
 // Description:
 //  Comprehensive, reversible mounting and solder footprint for Lenovo ThinkPad
