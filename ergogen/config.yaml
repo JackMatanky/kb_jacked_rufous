@@ -12,6 +12,7 @@ meta:
   url: &kb_url https://github.com/JackMatanky/kb_jacked_rufous
   preset:
     $extends:
+      - settings.layout
       - settings.switch
       - settings.key_diode
       - settings.mcu
@@ -19,11 +20,16 @@ meta:
       - settings.power
       - settings.reset
       - settings.battery_connector
+      - settings.ffc_connector
+      - settings.trackpoint
 
 # ---------------------------------------------- #
 #                    SETTINGS                    #
 # ---------------------------------------------- #
 settings:
+  layout:
+    $extends: presets.layout.rufous.choc
+    # $extends: presets.layout.rufous.mx
   switch:
     # $extends: presets.key.mx
     $extends: presets.key.choc_v1
@@ -38,6 +44,8 @@ settings:
     key_pad_yo: 0.5(key_pad_y)
     key_dpad_x: key_size_x + 2(key_pad)
     key_dpad_y: key_size_y + 2(key_pad)
+    key_tpad_x: key_size_x + 3(key_pad)
+    key_tpad_y: key_size_y + 3(key_pad)
   key_diode:
     $extends: presets.key_diode.single
     # $extends: presets.key_diode.double
@@ -72,6 +80,14 @@ settings:
     # $extends: presets.battery_connector.jst_2p_straight
     bat_size_xo: 0.5(bat_size_x)
     bat_size_yo: 0.5(bat_size_y)
+  ffc_connector:
+    $extends: presets.ffc_connector.molex_12p
+  trackpoint:
+    $extends: presets.trackpoint.t460s
+    tp_size_xo: 0.5(tp_size_x)
+    tp_size_yo: 0.5(tp_size_y)
+    tp_reset_size_x: 7.975
+    tp_reset_size_y: 3.36
   point_debugger:
     enabled: true
 
@@ -101,10 +117,6 @@ presets:
       key_cap_y: 18
       key_col_spread: 19
       key_row_padding: 19
-      pinky_splay: 5
-      pinky_adj: -4
-      ring_splay: 3
-      ring_adj: -10
     choc_v1:
       key_size_x: cx # 18
       key_size_y: cy # 17
@@ -114,10 +126,6 @@ presets:
       key_cap_y: key_size_y - 0.5
       key_col_spread: key_size_x + 0.5
       key_row_padding: key_size_y + 0.5
-      pinky_splay: 5
-      pinky_adj: -3
-      ring_splay: 3
-      ring_adj: -8
     choc_v2:
       $extends: presets.key.choc_v1
       key_size_x: u
@@ -197,11 +205,53 @@ presets:
       bat_size_x: 6.5 # Footprint; Actual width: 4.0 ± 0.1
       bat_size_y: 7.25 # Footprint; Actual height: 3.5 ± 0.1
 
+  ffc_connector:
+    molex_12p:
+      ffc_size_x: 18
+      ffc_size_y: 5.3
+
+  trackpoint:
+    t460s:
+      tp_size_x: 12.5
+      tp_size_y: 23.3
+      tp_mount_size_x: 5.5
+      tp_mount_size_y: 5
+      tp_mount_size_xo: 0.5(tp_mount_size_x)
+      tp_mount_size_yo: 0.5(tp_mount_size_y)
+      tp_hex_diag_size: 3.5
+      tp_hex_side_size: 6
+      tp_hex_size_y: 2(tp_hex_diag_size) + tp_hex_side_size
+      tp_hex_size_yo: tp_hex_size_y/2
+      tp_hole_radius_stick: 3.7
+
+  layout:
+    rufous:
+      base: # Minimum Spacing
+        # Degrees of splay between pinky and ring columns
+        pinky_splay: 5
+        # Adjustment to compensate for splay spacing
+        pinky_adj: -3
+        ring_splay: 3
+        ring_adj: -8
+        middle_splay: 3
+        middle_adj: -5
+      choc:
+        $extends: presets.layout.rufous.base
+        middle_splay: 0
+        middle_adj: 0
+      mx:
+        $extends: presets.layout.rufous.base
+        pinky_adj: -4
+        ring_adj: -10
+        middle_splay: 0
+        middle_adj: 0
+
 # ---------------------------------------------- #
 #                     UNITS                      #
 # ---------------------------------------------- #
 units:
   $extends: meta.preset
+  $default_autobind: 0
 
   mirror_shift: 16
   mirror_angle: 22
@@ -270,26 +320,11 @@ units:
   reset_rotate: 180 # 270 + 52
 
   # ---------------- Trackpoint ---------------- #
-  tp_size_x: 12.5
-  tp_size_y: 23.3
-  tp_size_xo: 0.5(tp_size_x)
-  tp_size_yo: 0.5(tp_size_y)
   tp_shift_x: -2.5
   tp_shift_y: 1.5
   tp_rotate: 0
 
-  # Outline
-  tp_mount_size_x: 5.5
-  tp_mount_size_y: 5
-  tp_hex_diag_size: 3.5
-  tp_hex_side_size: 6
-  tp_hex_size_y: 2(tp_hex_diag_size) + tp_hex_side_size
-  tp_hex_size_yo: tp_hex_size_y/2
-  tp_hole_radius_stick: 3.7
-
   # TP Reset Circuit
-  tp_reset_size_x: 7.975
-  tp_reset_size_y: 3.36
   tp_reset_shift_x: mcu_size_x
   tp_reset_shift_y: mcu_size_y/3
   tp_reset_rotate: 180
@@ -320,6 +355,8 @@ units:
 
   # Circle
   bot_crcl_radius: 80
+  bot_crcl_radius_dp: bot_crcl_radius - 2
+  bot_crcl_radius_tp: bot_crcl_radius - 4
   bot_crcl_shift_x: 0
   bot_crcl_shift_y: -(bot_crcl_radius) + 10 # 14 (MX)
 
@@ -348,7 +385,7 @@ points.zones:
       height: key_cap_y
       padding: key_row_padding
       spread: key_col_spread
-      mirror.colrow: "mirror_{{col.name}}_{{row}}"
+      # mirror.colrow: "mirror_{{col.name}}_{{row}}"
       # autobind: false
       # bind: [top, right, bottom, left]
     rows:
@@ -357,7 +394,7 @@ points.zones:
         mirror.row_net: R6
       r2: # Home
         row_net: R2
-        mirror.row_net: R5
+        mirror.row_net: R4
       r1: # Top
         row_net: R1
         mirror.row_net: R4
@@ -372,11 +409,9 @@ points.zones:
         rows:
           r3.skip: true
           r2:
-            bind: [key_size_yo, key_size_xo, 0, 0]
             column_net: C1
             mirror.column_net: C1
           r1:
-            bind: [0, key_size_xo, key_size_yo, 0]
             column_net: C1
             mirror.column_net: C1
       # Ring
@@ -391,15 +426,12 @@ points.zones:
           origin: [0, pinky_adj]
         rows:
           r3:
-            bind: [key_size_yo, 0, 0, 0]
             column_net: C1
             mirror.column_net: C1
           r2:
-            bind: [0, key_size_xo, 0, 0]
             column_net: C2
             mirror.column_net: C2
           r1:
-            bind: [0, key_size_xo, key_size_yo, 0]
             column_net: C2
             mirror.column_net: C2
       c3:
@@ -433,14 +465,13 @@ points.zones:
           stagger: index_col_stagger
         rows:
           r3:
-            bind: [key_size_yo, 0, key_size_y, 0]
+            bind: [0, 0, key_size_y, 0]
             column_net: C3
             mirror.column_net: C3
           r2:
             column_net: C4
             mirror.column_net: C4
           r1:
-            bind: [0, 0.5, key_size_yo, key_size_xo]
             column_net: C4
             mirror.column_net: C4
       c5:
@@ -456,7 +487,6 @@ points.zones:
             column_net: C5
             mirror.column_net: C5
           r1:
-            bind: [0, 0, key_size_yo, key_size_xo]
             column_net: C5
             mirror.column_net: C5
   thumb:
@@ -466,7 +496,7 @@ points.zones:
         - key
         - thumb
         - non_tp
-      mirror.colrow: "mirror_{{col.name}}_{{row}}"
+      # mirror.colrow: "mirror_{{col.name}}_{{row}}"
     anchor:
       ref: matrix_c4_r3
       shift: [thumb_offset_x, thumb_offset_y]
@@ -510,6 +540,7 @@ points.zones:
         - ref: thumb_in
         - ref: mirror_thumb_in
       shift: [0, -(key_size_yo)]
+
   # ---------------- Components ---------------- #
   mcu:
     key:
@@ -684,6 +715,11 @@ outlines:
     - what: rectangle
       <<: *raw_outline
       size: [key_dpad_x, key_dpad_y]
+  _raw_tp:
+    - what: rectangle
+      <<: *raw_outline
+      size: [key_tpad_x, key_tpad_y]
+
   _keycaps:
     # Key outline minus .5mm to show overlapping keys.
     - what: rectangle
@@ -692,6 +728,7 @@ outlines:
       where:
         - /matrix_.*/
         - /thumb_(in|out)/
+
   _switches:
     - what: rectangle
       bound: false
@@ -794,21 +831,21 @@ outlines:
     - what: polygon
       points:
         - ref: trackpoint # Right of top mount
-          shift: [(tp_mount_size_x)/2, tp_hex_size_yo]
+          shift: [tp_mount_size_xo, tp_hex_size_yo]
         - ref: trackpoint
           shift: [tp_size_xo, (tp_hex_side_size)/2]
         - ref: trackpoint # Right of tp hole
           shift: [tp_size_xo, -(tp_hex_side_size)/2]
         - ref: trackpoint
-          shift: [(tp_mount_size_x)/2, -tp_hex_size_yo]
+          shift: [tp_mount_size_xo, -tp_hex_size_yo]
         - ref: trackpoint # Left of bottom mount
-          shift: [-(tp_mount_size_x)/2, -tp_hex_size_yo]
+          shift: [-tp_mount_size_xo, -tp_hex_size_yo]
         - ref: trackpoint
           shift: [-(tp_size_xo), -(tp_hex_side_size)/2]
         - ref: trackpoint # Left of tp hole
           shift: [-(tp_size_xo), (tp_hex_side_size)/2]
         - ref: trackpoint
-          shift: [-(tp_mount_size_x)/2, tp_hex_size_yo]
+          shift: [-tp_mount_size_xo, tp_hex_size_yo]
     - name: _tp_stick_hole
       operation: stack
     - name: _tp_key_hole
@@ -852,31 +889,37 @@ outlines:
   # -------------- Unibody Bridge -------------- #
   _center_rect:
     - what: rectangle
-      where:
+      where: &center_rect
         ref: [mcu]
         shift: [0, -top_rect_shift_y + 2.0]
       size: [6.25(key_size_x), mcu_size_y + 2(top_rect_shift_y)]
-
   _center_rect_dp:
     - what: rectangle
       where:
-        ref: [mcu]
-        shift: [0, -top_rect_shift_y + 2.0]
+        <<: *center_rect
       size: [6.25(key_size_x), mcu_size_y + 2.25(top_rect_shift_y)]
+  _center_rect_tp:
+    - what: rectangle
+      where:
+        <<: *center_rect
+      size: [6.25(key_size_x), mcu_size_y + 2.5(top_rect_shift_y)]
 
   _bottom_arc:
     - what: circle
       radius: bot_crcl_radius
-      where:
+      where: &bottom_arc
         ref: ref_bottom_center
         shift: [bot_crcl_shift_x, bot_crcl_shift_y]
-
   _bottom_arc_dp:
     - what: circle
-      radius: bot_crcl_radius - 2
+      radius: bot_crcl_radius_dp
       where:
-        ref: ref_bottom_center
-        shift: [bot_crcl_shift_x, bot_crcl_shift_y]
+        <<: *bottom_arc
+  _bottom_arc_tp:
+    - what: circle
+      radius: bot_crcl_radius_tp
+      where:
+        <<: *bottom_arc
 
   _panel:
     - name: _center_rect
@@ -890,7 +933,7 @@ outlines:
       fillet: 1.5
     # - name: _holes_standoff
 
-  panel_xl:
+  panel_dp:
     - name: _center_rect_dp
       fillet: 3 # The inner rounding where the glue meets the top center keys
     - name: _raw_dp
@@ -898,8 +941,18 @@ outlines:
       name: _bottom_arc_dp
       fillet: 1.5
 
-  panel_dp:
-    - name: panel_xl
+  panel_tp:
+    - name: _center_rect_tp
+      fillet: 3 # The inner rounding where the glue meets the top center keys
+    - name: _raw_tp
+    - operation: subtract
+      name: _bottom_arc_tp
+      fillet: 1.5
+
+  panel_compare:
+    - name: panel_tp
+    - operation: stack
+      name: panel_dp
     - operation: stack
       name: panel
 
@@ -975,46 +1028,6 @@ pcbs.jacked_rufous:
       outline: panel
       layer: Eco2.User
   footprints:
-    # -------------- Key Switches -------------- #
-    key_switch:
-      what: ceoloide/switch_choc_v1_v2
-      where:
-        - /matrix_/
-        - /thumb_(in|out)/
-      adjust.rotate: key_rotate
-      params:
-        include_stabilizer_pad: false
-        from: "{{column_net}}"
-        to: "{{colrow}}"
-
-    # ----------------- Diodes ----------------- #
-    diode:
-      what: ceoloide/diode_tht_sod123
-      where:
-        - /matrix/
-        - /thumb_(in|out)/
-      adjust:
-        rotate: diode_matrix_rotate
-        shift: [-diode_shift_x, diode_shift_y]
-      params:
-        from: "{{colrow}}"
-        to: "{{row_net}}"
-        side: "B"
-        reversible: false
-        include_tht: false
-    diode_via_row_net_route:
-      what: ceoloide/utility_router
-      where: [key]
-      params:
-        net: "{{row_net}}"
-        route: "b(-1.5, -3.5)(-2.75, -3.5)v(-2.75, -3.5)"
-    diode_via_colrow_route:
-      what: ceoloide/utility_router
-      where: [key]
-      params:
-        net: "{{colrow}}"
-        route: "b(1.5, -3.5)(2.75, -3.5)v(2.75, -3.5)"
-
     # ------------------ MCU ------------------- #
     mcu:
       what: mcu_xiao_nrf52840_plus
@@ -1050,9 +1063,11 @@ pcbs.jacked_rufous:
         D12: R1
         D13: R2
         D14: R3
-        D15: R4
-        D17: R5
-        D18: R6
+        D15: ""
+        D17: R4
+        D18: R5
+        D2: R6
+        D3: ""
 
         # Reset
         RST: RST
@@ -1092,7 +1107,7 @@ pcbs.jacked_rufous:
         invert_behavior: false
         include_silkscreen: true
         include_courtyard: false
-    power_pos_route:
+    power_pos_route: &power_route
       what: ceoloide/utility_router
       where: [power]
       params:
@@ -1103,8 +1118,7 @@ pcbs.jacked_rufous:
             "b(-0.65, 2.25)(-1.75, 2.25)",
           ]
     power_raw_route:
-      what: ceoloide/utility_router
-      where: [power]
+      <<: *power_route
       params:
         net: RAW
         routes:
@@ -1121,7 +1135,7 @@ pcbs.jacked_rufous:
         include_bosses: true
         include_silkscreen: true
         include_courtyard: false
-    reset_rst_route:
+    reset_rst_route: &reset_route
       what: ceoloide/utility_router
       where: [reset]
       params:
@@ -1134,8 +1148,7 @@ pcbs.jacked_rufous:
             "b(0.75, 0.8)(2.5, 0.8)",
           ]
     reset_gnd_route:
-      what: ceoloide/utility_router
-      where: [reset]
+      <<: *reset_route
       params:
         net: GND
         routes:
@@ -1159,17 +1172,14 @@ pcbs.jacked_rufous:
         include_courtyard: false
         BAT_P: pos
         BAT_N: GND
-
-    bat_pos_route:
+    bat_pos_route: &bat_route
       what: ceoloide/utility_router
       where: [bat_main]
       params:
         net: pos
         routes: ["f(-1.0, 2.82)(0, 3.7)v(0, 3.7)", "b(0, 3.7)(1.0, 2.82)"]
-
     bat_gnd_route:
-      what: ceoloide/utility_router
-      where: [bat_main]
+      <<: *bat_route
       params:
         net: GND
         routes:
@@ -1291,18 +1301,207 @@ pcbs.jacked_rufous:
     #     label_5: VCC
     #     label_at_bottom: true
 
-    # ------------- M2 Screw Holes ------------- #
-    holes_mount:
-      what: ceoloide/mounting_hole_plated
-      where: [hole]
-      #include_courtyard: false
+    # -------------- Key Switches -------------- #
+    key_switch:
+      what: ceoloide/switch_choc_v1_v2
+      where:
+        - /matrix_/
+        - /thumb_(in|out)/
+      adjust.rotate: key_rotate
+      params:
+        include_stabilizer_pad: false
+        from: "{{column_net}}"
+        to: "{{colrow}}"
+    # key_column_net_route:
+    #   what: ceoloide/utility_router
+    #   where: /.*r[2,3]$/
+    #   params:
+    #     net: "{{column_net}}"
+    #     routes:
+    #       [
+    #         "b(3.25, 5.875)(3.5, 5.125)",
+    #         "b(3.5, 5.125)(3.5, -10.5)",
+    #         "b(3.5, -10.5)(3.25, -11.125)",
+    #       ]
+    key_column_net_r1_r2_route:
+      what: ceoloide/utility_router
+      where: /r1/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(3.25, 5.875)(3.625, 5.0)",
+            "b(3.625, 5.0)(3.625, 22.625)",
+            "b(3.625, 22.625)(3.25, 23.5)",
+          ]
+    key_column_net_matrix_r2_r3_start_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c[2-4]_r2/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(3.25, 5.875)(3.875, 5.0)",
+            "b(3.875, 5.0)(3.875, 18.0)",
+            "b(3.875, 18.0)(5.25, 19.5)",
+          ]
+    key_column_net_mirror_r2_r3_start_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c[1-3]_r2/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(3.25, 5.875)(1.5, 8.5)",
+            "b(1.5, 8.5)(-6.5, 8.5)",
+            "b(-6.5, 8.5)(-10.0, 12.0)",
+          ]
+    key_column_net_matrix_c1_r2_r3_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c1_r2/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(3.25, 5.875)(8.25, 9.75)",
+            "b(8.25, 9.75)(8.25, 11.75)",
+            "b(8.25, 11.75)(11.25, 14.25)",
+            "b(11.25, 14.25)(20.0, 15.125)",
+            "b(20.0, 15.125)(21.75, 13.25)",
+          ]
+    key_column_net_matrix_c2_r2_r3_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c2_r2/
+      params:
+        net: "{{column_net}}"
+        route: "b(5.25, 19.5)(20.25, 20.0)(22.0, 17.875)"
+    key_column_net_matrix_c3_r2_r3_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c3_r2/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(5.25, 19.5)(21.0, 19.75)",
+            "b(21.0, 19.75)(21.875, 20.875)",
+            "b(21.875, 20.875)(21.875, 30.75)",
+          ]
+    key_column_net_matrix_c4_r2_thumb_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c4_r2/
+      params:
+        net: "{{column_net}}"
+        route: "b(5.25, 19.5)(5.25, 32.25)(2, 46.25)"
+    key_column_net_mirror_c4_r2_thumb_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c4_r2/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(-10.0, 12.0)(-10.0, 23.0)(-7.0, 25.5)",
+            "b(5.25, 19.5)(5.25, 32.25)(2, 46.25)",
+          ]
+    key_column_net_matrix_c5_thumb_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c5_r2/
+      params:
+        net: "{{column_net}}"
+        route: "b(3.25, 5.875)(5.25, 33.0)(0.5, 42.0)"
+    key_column_net_mirror_c5_thumb_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c5_r2/
+      params:
+        net: "{{column_net}}"
+        route: "b(3.25, 5.875)(2.5, 33.0)(4.5, 38.0)"
+    key_row_net_diode_top_route:
+      what: ceoloide/utility_router
+      where:
+        - /^matrix.*c2_r[12]/
+        - /^matrix.*c[3-5]/
+        - /^thumb_in/
+        - /mirror.*c[1-3]/
+        - /mirror.*c4_r[12]/
+        - /mirror_thumb_out/
+      params:
+        net: "{{row_net}}"
+        route: "f(2.875, -3.5)(2.0, -4.625)(-2.625, -4.625)"
+    key_row_net_diode_left_route:
+      what: ceoloide/utility_router
+      where:
+        - /c3/
+        - /^matrix.*c2_r[12]/
+        - /mirror.*c4_r[12]$/
+      params:
+        net: "{{row_net}}"
+        routes: [
+            "f(-2.625, -4.625)(-3.5, -3.5)(-3.5, 0.625)",
+            "f(-3.5, 0.625)(-4.25, 1.375)",
+            "f(-4.25, 1.375)(-6.5, 1.375)",
+            "f(-6.5, 1.375)(-7.375, 2.125)",
+            "f(-7.375, 2.125)(-9.75, 2.125)",
+            # "f(-9.25, 1.375)(-11.25, 3.7)",
+            # "f(-11.25, 3.7)(-15.5, 3.7)",
+          ]
+    key_row_net_diode_right_route:
+      what: ceoloide/utility_router
+      where:
+        - /c3/
+        - /^matrix_c4_r[12]$/
+        - /mirror.*_c2_r[12]$/
+      params:
+        net: "{{row_net}}"
+        routes:
+          [
+            "f(2.75, -3.5)(3.625, -2.5)",
+            "f(3.625, -2.5)(3.625, 0.625)",
+            "f(3.625, 0.625)(5.25, 2.375)",
+          ]
+    key_row_net_matrix_c3_c4_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c3/
+      params:
+        net: "{{row_net}}"
+        routes: ["f(5.25, 2.375)(15.9, 2.575)"]
+    # key_row_net_mirror_c3_c4_route:
+    #   what: ceoloide/utility_router
+    #   where:
+    #     - /mirror.*c3/
+    #     - /mirror.*c4_r[1,2]$/
+    #   params:
+    #     net: "{{row_net}}"
+    #     routes:
+    #       [
+    #         "f(2.75, -3.5)(2.0, -4.75)",
+    #         "f(2.0, -4.75)(-2.75, -4.75)",
+    #         "f(-2.75, -4.75)(-3.75, -3.5)",
+    #         "f(-3.75, -3.5)(-3.75, 0.625)",
+    #         "f(-3.75, 0.625)(-4.375, 1.25)",
+    #         "f(-4.375, 1.25)(-9.25, 1.25)",
+    #         "f(-9.25, 1.25)(-11.25, 3.7)",
+    #         "f(-11.25, 3.7)(-15.5, 3.7)",
+    #       ]
 
-    # -------------- Trace Routes -------------- #
-    key_diode_row_net_route:
+    # ----------------- Diodes ----------------- #
+    diode:
+      what: ceoloide/diode_tht_sod123
+      where:
+        - /matrix/
+        - /thumb_(in|out)/
+      adjust:
+        rotate: diode_matrix_rotate
+        shift: [-diode_shift_x, diode_shift_y]
+      params:
+        from: "{{colrow}}"
+        to: "{{row_net}}"
+        side: "B"
+        reversible: false
+        include_tht: false
+    key_diode_colrow_route: &diode_route
       what: ceoloide/utility_router
       where: [key]
       params:
-        net: "{{row_net}}"
+        net: "{{colrow}}"
         routes: [
             # Hotswap diaganol to stabilizer hole
             "b(-8.275, 3.75)(-6.421, 1.875)",
@@ -1312,46 +1511,26 @@ pcbs.jacked_rufous:
             "b(-3.0, 0.875)(-3.0, -1.75)",
             "b(-3.0, -1.75)(-1.5, -3.5)",
           ]
-
-    key_column_net_r2_route:
-      what: ceoloide/utility_router
-      where: /.*r2$/
+    diode_via_row_net_route:
+      <<: *diode_route
       params:
-        net: "{{column_net}}"
-        routes:
-          [
-            "b(3.25, 5.875)(3.5, 5.125)",
-            "b(3.5, 5.125)(3.5, -10.5)",
-            "b(3.5, -10.5)(3.25, -11.125)",
-          ]
-
-    key_column_net_matrix_r3_route:
-      what: ceoloide/utility_router
-      where: /^matrix.*r3$/
+        net: "{{row_net}}"
+        route: "b(1.5, -3.5)(2.75, -3.5)v(2.75, -3.5)"
+    diode_via_colrow_route:
+      <<: *diode_route
       params:
-        net: "{{column_net}}"
-        route: "b(4.1, 6.0)(2.1, 8)(-7.75, 8)(-9.5, 6.5)" # (-10.25,4.5)
+        net: "{{colrow}}"
+        route: "b(-1.5, -3.5)(-2.75, -3.5)v(-2.75, -3.5)"
 
-    key_column_net_matrix_c2_r3_route:
-      what: ceoloide/utility_router
-      where: /^matrix_c2_r3/
-      params:
-        net: "{{column_net}}"
-        route: "b(-9.5, 6.5)(-10.5, 4.25)(-14.5, 1.5)"
+    # -------------- Trace Routes -------------- #
 
-    key_column_net_matrix_c3_r3_route:
-      what: ceoloide/utility_router
-      where: /^matrix_c3_r3/
-      params:
-        net: "{{column_net}}"
-        route: "b(-9.5, 6.5)(-15.75, -5)"
+    # ------------- M2 Screw Holes ------------- #
+    holes_mount:
+      what: ceoloide/mounting_hole_plated
+      where: [hole]
+      #include_courtyard: false
 
-    key_column_net_matrix_c4_r3_route:
-      what: ceoloide/utility_router
-      where: /^matrix_c4_r3/
-      params:
-        net: "{{column_net}}"
-        route: "b(-9.5, 6.5)(-10, 5)(-10.5, 3.5)(-12.5, 0)(-14, -4.25)(-14.5, -7.25)(-14.5, -18)"
+    # ------------ Key Trace Routes ------------ #
 
 # ---------------------------------------------- #
 #                     CASES                      #
@@ -1360,29 +1539,54 @@ cases:
   switchplate:
     - name: switchplate
       extrude: 1
-  bottom:
+
+  _bottom:
     - name: panel
       extrude: 1
-  bottom_xl:
-    - name: panel_xl
+  _bottom_dp:
+    - name: panel_dp
       extrude: 1
-  _outerWall:
-    - name: panel_xl
-      extrude: 4
-  _innerWall:
+  _bottom_tp:
+    - name: panel_tp
+      extrude: 1
+
+  _inner_wall_case:
     - name: panel
-      extrude: 4
-  wall:
+      extrude: 6
+  _outer_wall_case:
+    - name: panel_dp
+      extrude: 6
+  _wall_case:
     - what: case
-      name: _outerWall
+      name: _outer_wall_case
       operation: add
     - what: case
-      name: _innerWall
+      name: _inner_wall_case
       operation: subtract
+
   case:
     - what: case
-      name: bottom_xl
+      name: _bottom_dp
+    - what: case
+      name: _wall_case
+      operation: add
+
+  _inner_wall_cover:
+    - name: panel_dp
+      extrude: 8
+  _outer_wall_cover:
+    - name: panel_tp
+      extrude: 8
+  _wall_cover:
+    - what: case
+      name: _outer_wall_cover
       operation: add
     - what: case
-      name: wall
+      name: _inner_wall_cover
+      operation: subtract
+  cover:
+    - what: case
+      name: _bottom_tp
+    - what: case
+      name: _wall_cover
       operation: add
