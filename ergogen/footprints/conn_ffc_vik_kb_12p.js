@@ -52,9 +52,9 @@
 //     false routes traces/vias backward (-Y, rear); true routes under body (+Y)
 //   trace_width: default is 0.2
 //     width of embedded crossover traces in mm
-//   via_size: default is 0.55
+//   via_size: default is 0.5
 //     outer diameter of crossover vias in mm
-//   via_drill: default is 0.3
+//   via_drill: default is 0.25
 //     drill diameter of crossover vias in mm
 //   include_silkscreen: default is true
 //     if true, includes silkscreen outlines, text, and pin 1 markers
@@ -108,8 +108,8 @@ module.exports = {
     include_traces_vias: true,
     invert_traces_vias_position: false,
     trace_width: 0.2,
-    via_size: 0.55,
-    via_drill: 0.3,
+    via_size: 0.5,
+    via_drill: 0.25,
     include_silkscreen: true,
     include_fabrication: true,
     include_courtyard: true,
@@ -294,8 +294,8 @@ ${p.at}
     let routing = "";
     if (p.reversible && p.include_traces_vias) {
       const y_dir = p.invert_traces_vias_position ? 1 : -1;
-      const base_pad_edge = def.pad_y + y_dir * (def.pad_dy / 2 + 0.3);
-      const pitch = 0.4;
+      const base_pad_edge = def.pad_y + y_dir * (def.pad_dy / 2 + 0.15);
+      const pitch = 0.28;
 
       const pair_order = [
         [6, 7],
@@ -309,31 +309,62 @@ ${p.at}
       const y_tracks = {};
       let track_idx = 0;
       for (const [p1, p2] of pair_order) {
-        y_tracks[p1] = Number((base_pad_edge + y_dir * (track_idx * pitch)).toFixed(3));
+        y_tracks[p1] = Number(
+          (base_pad_edge + y_dir * (track_idx * pitch)).toFixed(3),
+        );
         track_idx++;
-        y_tracks[p2] = Number((base_pad_edge + y_dir * (track_idx * pitch)).toFixed(3));
+        y_tracks[p2] = Number(
+          (base_pad_edge + y_dir * (track_idx * pitch)).toFixed(3),
+        );
         track_idx++;
       }
+
+      // Optimal diagonal via placement on each wing:
+      // Left pins (1..6) form a clean diagonal from X = +3.30 to +4.80 mm (dx = 0.30 mm)
+      // Right pins (7..12) form a clean diagonal from X = -4.80 to -3.30 mm (dx = 0.30 mm)
+      // Well within the connector body outline (±5.5 mm) while keeping Y compact (3.08 mm total height)
+      const via_x_map = {
+        1: 3.30,
+        2: 3.60,
+        3: 3.90,
+        4: 4.20,
+        5: 4.50,
+        6: 4.80,
+        7: -4.80,
+        8: -4.50,
+        9: -4.20,
+        10: -3.90,
+        11: -3.60,
+        12: -3.30,
+      };
+      const trace_w = p.trace_width || 0.15;
+      const via_sz = p.via_size || 0.5;
+      const via_dr = p.via_drill || 0.25;
 
       for (let n = 1; n <= 12; n++) {
         const x_front = pad_x(n, "F");
         const x_back = pad_x(n, "B");
+        const x_via = via_x_map[n];
         const y_pad = pin_y(n);
         const y_trk = y_tracks[n];
         const net_idx = nets[n - 1].index;
 
-        // Front copper: vertical stub from Front Pad to track Y, then horizontal to Back Pad X
-        routing += `\n(segment (start ${p.eaxy(x_front, y_pad)}) (end ${p.eaxy(x_front, y_trk)}) (width ${p.trace_width}) (layer "F.Cu") (net ${net_idx}))`;
-        routing += `\n(segment (start ${p.eaxy(x_front, y_trk)}) (end ${p.eaxy(x_back, y_trk)}) (width ${p.trace_width}) (layer "F.Cu") (net ${net_idx}))`;
+        // Front copper:
+        // 1. Vertical stub from Front Pad to track Y
+        routing += `\n(segment (start ${p.eaxy(x_front, y_pad)}) (end ${p.eaxy(x_front, y_trk)}) (width ${trace_w}) (layer "F.Cu") (net ${net_idx}))`;
+        // 2. Horizontal crossover segment from Front Pad X to lateral wing Via X
+        routing += `\n(segment (start ${p.eaxy(x_front, y_trk)}) (end ${p.eaxy(x_via, y_trk)}) (width ${trace_w}) (layer "F.Cu") (net ${net_idx}))`;
 
-        // Via at (x_back, y_trk) linking F.Cu and B.Cu
-        routing += `\n(via (at ${p.eaxy(x_back, y_trk)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${net_idx}))`;
+        // Via at lateral wing position (x_via, y_trk)
+        routing += `\n(via (at ${p.eaxy(x_via, y_trk)}) (size ${via_sz}) (drill ${via_dr}) (layers "F.Cu" "B.Cu") (net ${net_idx}))`;
 
-        // Back copper: vertical stub from Via to Back Pad
-        routing += `\n(segment (start ${p.eaxy(x_back, y_trk)}) (end ${p.eaxy(x_back, y_pad)}) (width ${p.trace_width}) (layer "B.Cu") (net ${net_idx}))`;
+        // Back copper:
+        // 1. Horizontal return segment from Via X to Back Pad X
+        routing += `\n(segment (start ${p.eaxy(x_via, y_trk)}) (end ${p.eaxy(x_back, y_trk)}) (width ${trace_w}) (layer "B.Cu") (net ${net_idx}))`;
+        // 2. Vertical stub from track Y into Back Pad
+        routing += `\n(segment (start ${p.eaxy(x_back, y_trk)}) (end ${p.eaxy(x_back, y_pad)}) (width ${trace_w}) (layer "B.Cu") (net ${net_idx}))`;
       }
     }
-
     return `${header}${pads}${graphics}${model_3d()}\n)${routing}\n`;
   },
 };
