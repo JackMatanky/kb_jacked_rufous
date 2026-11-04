@@ -1032,16 +1032,20 @@ pcbs.jacked_rufous:
     mcu:
       what: mcu_xiao_nrf52840_plus
       where: mcu
-      # the footprint origin is the pad-row centre, 0.075 mm off the old xiao_plus origin
+      # the footprint origin is the pad-row centre,
+      # 0.075 mm off the old xiao_plus origin
       adjust.shift: [0, -0.075]
       params:
         reversible: true
 
         # Required internal pad groups
-        include_main_pads: true
+        include_swd_pads: true
+        include_swd_traces: true
+        swd_cutout: side_slots
         include_battery_pads: true
-        include_battery_cutouts: true
-        include_interconnect_traces: true
+        include_battery_cutout: true
+        include_battery_traces: true
+        include_traces_vias: true
 
         # TrackPoint PS/2
         D0: TPD
@@ -1112,17 +1116,12 @@ pcbs.jacked_rufous:
       where: [power]
       params:
         net: pos
-        routes:
-          [
-            "f(-1.75, 2.25)(-0.65, 2.25)v(-0.65, 2.25)",
-            "b(-0.65, 2.25)(-1.75, 2.25)",
-          ]
+        route: "f(-1.75, 2.25)(-0.65, 2.25)v(-1.75, 2.25)"
     power_raw_route:
       <<: *power_route
       params:
         net: RAW
-        routes:
-          ["b(-1.75, 0.75)(-1.75, 0)v(-1.75, 0)", "f(-1.75, 0)(-1.75, -0.75)"]
+        route: "f(-1.75, -0.75)(-1.75, 0)v(-1.75, 0.75)"
 
     # -------------- Reset Button -------------- #
     reset:
@@ -1142,10 +1141,8 @@ pcbs.jacked_rufous:
         net: RST
         routes:
           [
-            "f(-2.5, 0.8)(-0.75, 0.8)",
-            "f(-0.75, 0.8)(0, 0.45)v(0, 0.45)",
-            "b(0, 0.45)(0.75, 0.8)",
-            "b(0.75, 0.8)(2.5, 0.8)",
+            "f(-2.5, 0.8)(-0.75, 0.8)(0, 0.45)v",
+            "b(0, 0.45)(0.75, 0.8)(2.5, 0.8)",
           ]
     reset_gnd_route:
       <<: *reset_route
@@ -1153,10 +1150,8 @@ pcbs.jacked_rufous:
         net: GND
         routes:
           [
-            "b(-2.5, -0.8)(-0.75, -0.8)",
-            "b(-0.75, -0.8)(0, -0.45)v(0, -0.45)",
-            "f(0, -0.45)(0.75, -0.8)",
-            "f(0.75, -0.8)(2.5, -0.8)",
+            "b(-2.5, -0.8)(-0.75, -0.8)(0, -0.45)v",
+            "f(0, -0.45)(0.75, -0.8)(2.5, -0.8)",
           ]
 
     # --------- JST Battery Connector ---------- #
@@ -1177,18 +1172,13 @@ pcbs.jacked_rufous:
       where: [bat_main]
       params:
         net: pos
-        routes: ["f(-1.0, 2.82)(0, 3.7)v(0, 3.7)", "b(0, 3.7)(1.0, 2.82)"]
+        route: "f(-1.0, 2.82)(0, 3.7)v(1.0, 2.82)"
     bat_gnd_route:
       <<: *bat_route
       params:
         net: GND
         routes:
-          [
-            "b(-1.0, 2.82)(0, 1.5)",
-            "b(0, 1.5)(0, -1.25)v(0, -1.25)",
-            "f(0, -1.25)(0, 1.5)",
-            "f(0, 1.5)(1.0, 2.82)",
-          ]
+          ["b(-1.0, 2.82)(0, 1.5)(0, -1.25)v", "f(0, -1.25)(0, 1.5)(1.0, 2.82)"]
 
     # -------------- Scrollwheel --------------- #
     # scrollwheel:
@@ -1223,8 +1213,9 @@ pcbs.jacked_rufous:
       what: conn_ffc_molex_12p
       where: trackpoint_ffc
       params:
-        side: F # fingers face the PCB (bottom contact); confirm with the ribbon
-        reversible: false
+        # side: F # fingers face the PCB (bottom contact); confirm with the ribbon
+        reversible: true
+        include_traces_vias: true
         pin_1: VCC
         pin_2: TPD
         pin_3: TPR
@@ -1312,28 +1303,12 @@ pcbs.jacked_rufous:
         include_stabilizer_pad: false
         from: "{{column_net}}"
         to: "{{colrow}}"
-    # key_column_net_route:
-    #   what: ceoloide/utility_router
-    #   where: /.*r[2,3]$/
-    #   params:
-    #     net: "{{column_net}}"
-    #     routes:
-    #       [
-    #         "b(3.25, 5.875)(3.5, 5.125)",
-    #         "b(3.5, 5.125)(3.5, -10.5)",
-    #         "b(3.5, -10.5)(3.25, -11.125)",
-    #       ]
     key_column_net_r1_r2_route:
       what: ceoloide/utility_router
       where: /r1/
       params:
         net: "{{column_net}}"
-        routes:
-          [
-            "b(3.25, 5.875)(3.625, 5.0)",
-            "b(3.625, 5.0)(3.625, 22.625)",
-            "b(3.625, 22.625)(3.25, 23.5)",
-          ]
+        route: "b(3.375, 5.875)(4.0, 6.5)(4.0, 22.25)(3.375, 22.875)"
     key_column_net_matrix_r2_r3_start_route:
       what: ceoloide/utility_router
       where: /^matrix_c[2-4]_r2/
@@ -1341,7 +1316,7 @@ pcbs.jacked_rufous:
         net: "{{column_net}}"
         routes:
           [
-            "b(3.25, 5.875)(3.875, 5.0)",
+            "b(3.375, 5.875)(3.875, 5.0)",
             "b(3.875, 5.0)(3.875, 18.0)",
             "b(3.875, 18.0)(5.25, 19.5)",
           ]
@@ -1352,7 +1327,7 @@ pcbs.jacked_rufous:
         net: "{{column_net}}"
         routes:
           [
-            "b(3.25, 5.875)(1.5, 8.5)",
+            "b(3.375, 5.875)(1.5, 8.5)",
             "b(1.5, 8.5)(-6.5, 8.5)",
             "b(-6.5, 8.5)(-10.0, 12.0)",
           ]
@@ -1363,18 +1338,35 @@ pcbs.jacked_rufous:
         net: "{{column_net}}"
         routes:
           [
-            "b(3.25, 5.875)(8.25, 9.75)",
+            "b(3.375, 5.875)(8.25, 9.75)",
             "b(8.25, 9.75)(8.25, 11.75)",
             "b(8.25, 11.75)(11.25, 14.25)",
             "b(11.25, 14.25)(20.0, 15.125)",
             "b(20.0, 15.125)(21.75, 13.25)",
           ]
+    key_column_net_mirror_c1_r2_r3_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c1_r2/
+      params:
+        net: "{{column_net}}"
+        route: "b(-10.0, 12.0)(-14.5, 12.5)"
     key_column_net_matrix_c2_r2_r3_route:
       what: ceoloide/utility_router
       where: /^matrix_c2_r2/
       params:
         net: "{{column_net}}"
         route: "b(5.25, 19.5)(20.25, 20.0)(22.0, 17.875)"
+    key_column_net_mirror_c2_r2_r3_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c2_r2/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(-10.0, 12.0)(-10.0, 15.0)",
+            "b(-10.0, 15.0)(-12.0, 17.0)",
+            "b(-12.0, 17.0)(-14.5, 17.2)",
+          ]
     key_column_net_matrix_c3_r2_r3_route:
       what: ceoloide/utility_router
       where: /^matrix_c3_r2/
@@ -1385,6 +1377,18 @@ pcbs.jacked_rufous:
             "b(5.25, 19.5)(21.0, 19.75)",
             "b(21.0, 19.75)(21.875, 20.875)",
             "b(21.875, 20.875)(21.875, 30.75)",
+          ]
+    key_column_net_mirror_c3_r2_r3_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c3_r2/
+      params:
+        net: "{{column_net}}"
+        routes:
+          [
+            "b(-10.0, 12.0)(-10.25, 12.25)",
+            "b(-10.25, 12.25)(-10.25, 28.5)",
+            "b(-10.25, 28.5)(-12.5, 30.5)",
+            "b(-12.5, 30.5)(-15.25, 30.55)",
           ]
     key_column_net_matrix_c4_r2_thumb_route:
       what: ceoloide/utility_router
@@ -1399,8 +1403,16 @@ pcbs.jacked_rufous:
         net: "{{column_net}}"
         routes:
           [
-            "b(-10.0, 12.0)(-10.0, 23.0)(-7.0, 25.5)",
-            "b(5.25, 19.5)(5.25, 32.25)(2, 46.25)",
+            "b(3.375, 5.875)(3.875, 5.0)",
+            "b(3.875, 5.0)(3.875, 18.5)",
+            "b(3.875, 18.5)(1.875, 21.0)",
+            "b(1.875, 21.0)(-1.0, 21.0)",
+            "b(-1.0, 21.0)(-2.5, 22.5)",
+            "b(-2.5, 22.5)(-2.5, 24.5)",
+            "b(-2.5, 24.5)(-1.0, 26.0)",
+            "b(-1.0, 26.0)(0.5, 26.0)",
+            "b(0.5, 26.0)(1.25, 26.75)",
+            "b(1.25, 26.75)(4.875, 45.75)",
           ]
     key_column_net_matrix_c5_thumb_route:
       what: ceoloide/utility_router
@@ -1426,7 +1438,7 @@ pcbs.jacked_rufous:
       params:
         net: "{{row_net}}"
         route: "f(2.875, -3.5)(2.0, -4.625)(-2.625, -4.625)"
-    key_row_net_diode_left_route:
+    key_row_net_diode_left_start_route:
       what: ceoloide/utility_router
       where:
         - /c3/
@@ -1434,16 +1446,25 @@ pcbs.jacked_rufous:
         - /mirror.*c4_r[12]$/
       params:
         net: "{{row_net}}"
-        routes: [
+        routes:
+          [
             "f(-2.625, -4.625)(-3.5, -3.5)(-3.5, 0.625)",
             "f(-3.5, 0.625)(-4.25, 1.375)",
             "f(-4.25, 1.375)(-6.5, 1.375)",
             "f(-6.5, 1.375)(-7.375, 2.125)",
             "f(-7.375, 2.125)(-9.75, 2.125)",
-            # "f(-9.25, 1.375)(-11.25, 3.7)",
-            # "f(-11.25, 3.7)(-15.5, 3.7)",
+            "f(-9.75, 2.125)(-10.375, 3.0)",
           ]
-    key_row_net_diode_right_route:
+    key_row_net_diode_left_mid_route:
+      what: ceoloide/utility_router
+      where:
+        - /^matrix.*c2_r[12]/
+        - /mirror.*c3/
+        - /mirror.*c4_r[12]/
+      params:
+        net: "{{row_net}}"
+        route: "f(-10.375, 3.0)(-11.0, 3.75)"
+    key_row_net_diode_right_start_route:
       what: ceoloide/utility_router
       where:
         - /c3/
@@ -1455,14 +1476,144 @@ pcbs.jacked_rufous:
           [
             "f(2.75, -3.5)(3.625, -2.5)",
             "f(3.625, -2.5)(3.625, 0.625)",
-            "f(3.625, 0.625)(5.25, 2.375)",
+            "f(3.625, 0.625)(5.25, 2.25)",
           ]
+    key_row_net_diode_right_mid_route:
+      what: ceoloide/utility_router
+      where:
+        - /^matrix_c4_r[12]$/
+        - /mirror.*_c2_r[12]$/
+      params:
+        net: "{{row_net}}"
+        route: "f(5.25, 2.25)(5.25, 4.75)(7.0, 6.175)"
+    key_row_net_matrix_c1_c2_start_route:
+      what: ceoloide/utility_router
+      where: /^matrix.*_c1/
+      params:
+        net: "{{row_net}}"
+        route: "f(2.875, -3.5)(7.5, -3.5)"
+    key_row_net_mirror_c1_c2_start_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c1/
+      params:
+        net: "{{row_net}}"
+        route: "f(-2.625, -4.625)(-11.875, -4.625)"
+    key_row_net_matrix_c1_c2_r1_route:
+      what: ceoloide/utility_router
+      where: /^matrix.*_c1_r1/
+      params:
+        net: "{{row_net}}"
+        routes:
+          [
+            "f(7.5, -3.5)(8.5, -3.5)",
+            "f(8.5, -3.5)(10.25, -5.25)",
+            "f(10.25, -5.25)(10.5, -7.8)",
+          ]
+    key_row_net_mirror_c1_c2_r1_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c1_r1/
+      params:
+        net: "{{row_net}}"
+        route: "f(-11.875, -4.625)(-13.625, -4.625)(-14.25, -5.075)"
+    key_row_net_matrix_c1_c2_r2_route:
+      what: ceoloide/utility_router
+      where: /^matrix.*_c1_r2/
+      params:
+        net: "{{row_net}}"
+        route: "f(7.5, -3.5)(9.0, -5.25)(9.0, -7.9)"
+    key_row_net_mirror_c1_c2_r2_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c1_r2/
+      params:
+        net: "{{row_net}}"
+        route: "f(-11.875, -4.625)(-12.75, -5.17)"
+    key_row_net_matrix_c2_c3_start_route:
+      what: ceoloide/utility_router
+      where: /^matrix.*_c2/
+      params:
+        net: "{{row_net}}"
+        route: "f(2.875, -3.5)(8.375, -3.5)"
+    key_row_net_mirror_c2_c3_start_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c2/
+      params:
+        net: "{{row_net}}"
+        route: "f(-2.625, -4.625)(-13.5, -4.0)"
+    key_row_net_matrix_c2_c3_r1_route:
+      what: ceoloide/utility_router
+      where: /^matrix.*_c2_r1/
+      params:
+        net: "{{row_net}}"
+        route: "f(8.375, -3.5)(10.25, -3.5)"
+    key_row_net_mirror_c2_c3_r1_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c2_r1/
+      params:
+        net: "{{row_net}}"
+        route: "f(-13.5, -4.0)(-15.5, -4.0)"
+    key_row_net_matrix_c2_c3_r2_route:
+      what: ceoloide/utility_router
+      where: /^matrix.*_c2_r2/
+      params:
+        net: "{{row_net}}"
+        route: "f(8.375, -3.5)(9.25, -3.5)"
+    key_row_net_mirror_c2_c3_r2_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c2_r2/
+      params:
+        net: "{{row_net}}"
+        route: "f(-13.5, -4.0)(-14.5, -4.0)"
     key_row_net_matrix_c3_c4_route:
       what: ceoloide/utility_router
       where: /^matrix_c3/
       params:
         net: "{{row_net}}"
-        routes: ["f(5.25, 2.375)(15.9, 2.575)"]
+        route: "f(5.25, 2.25)(15.9, 2.575)"
+    key_row_net_mirror_c3_c4_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c3/
+      params:
+        net: "{{row_net}}"
+        route: "f(-11.0, 3.75)(-15.875, 3.75)"
+    key_row_net_matrix_c4_c5_route:
+      what: ceoloide/utility_router
+      where: /^matrix_c4_r[12]/
+      params:
+        net: "{{row_net}}"
+        routes:
+          [
+            "f(5.25, 2.25)(5.25, 4.75)",
+            "f(5.25, 4.75)(7.0, 6.175)",
+            "f(7.0, 6.175)(15.8, 6.175)",
+          ]
+    key_row_net_mirror_c4_c5_route:
+      what: ceoloide/utility_router
+      where: /mirror.*_c4_r[12]/
+      params:
+        net: "{{row_net}}"
+        route: "f(-11.0, 3.75)(-11.0, 5.75)(-12.5, 7.25)(-15.875, 7.25)"
+    key_row_net_thumb_start_route:
+      what: ceoloide/utility_router
+      where:
+        - /^thumb_in/
+        - /mirror_thumb_out/
+      params:
+        net: "{{row_net}}"
+        routes:
+          [
+            "f(-2.625, -4.625)(-7.5, -4.625)",
+            "f(-7.5, -4.625)(-10.0, -6.0)",
+            "f(-10.0, -6.0)(-11.75, -5.625)",
+            "f(-11.75, -5.625)(-14.0, -2.75)",
+            "f(-14.0, -2.75)(-17.75, -1.75)",
+          ]
+
+        # routes:
+        #   [
+        #     "f(7.5, -4.0)(9.25, -6.0)",
+        #     "f(9.25, -6.0)(12.125, -5.75)",
+        #     "f(12.125, -5.75)(13.5, -3.25)",
+        #   ]
     # key_row_net_mirror_c3_c4_route:
     #   what: ceoloide/utility_router
     #   where:
@@ -1515,12 +1666,12 @@ pcbs.jacked_rufous:
       <<: *diode_route
       params:
         net: "{{row_net}}"
-        route: "b(1.5, -3.5)(2.75, -3.5)v(2.75, -3.5)"
+        route: "b(1.5, -3.5)(2.75, -3.5)v"
     diode_via_colrow_route:
       <<: *diode_route
       params:
         net: "{{colrow}}"
-        route: "b(-1.5, -3.5)(-2.75, -3.5)v(-2.75, -3.5)"
+        route: "b(-1.5, -3.5)(-2.75, -3.5)v"
 
     # -------------- Trace Routes -------------- #
 

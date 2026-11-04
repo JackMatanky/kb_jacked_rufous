@@ -1046,9 +1046,9 @@ pcbs.jacked_rufous:
         reversible: false
 
         # Required internal pad groups
-        include_main_pads: true
+        include_swd_pads: true
         include_battery_pads: true
-        include_battery_cutouts: true
+        include_battery_cutout: true
 
         # TrackPoint PS/2
         D0: TPD
