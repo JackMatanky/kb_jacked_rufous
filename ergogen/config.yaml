@@ -206,7 +206,7 @@ presets:
       bat_size_y: 7.25 # Footprint; Actual height: 3.5 ± 0.1
 
   ffc_connector:
-    molex_12p:
+    molex_12p: # (Molex 2005280120)
       ffc_size_x: 18
       ffc_size_y: 5.3
 
@@ -223,6 +223,17 @@ presets:
       tp_hex_size_y: 2(tp_hex_diag_size) + tp_hex_side_size
       tp_hex_size_yo: tp_hex_size_y/2
       tp_hole_radius_stick: 3.7
+
+  vik_connector:
+    horizontal:
+      vik_size_x: 11.0
+      vik_size_y: 6.5
+    horizontal_mini:
+      vik_size_x: 7.7
+      vik_size_y: 3.35
+    vertical:
+      vik_size_x: 11.6
+      vik_size_y: 3.0
 
   layout:
     rufous:
@@ -255,7 +266,7 @@ units:
 
   mirror_shift: 16
   mirror_angle: 22
-  mirror_distance: 2.25(key_size_x) # 23
+  mirror_distance: 2.25(key_size_x) # 40.5; Original: 23
 
   key_rotate: 180
   inner_key_rotate: 270
@@ -276,15 +287,15 @@ units:
   thumb_in_bind_bot: 0
   thumb_in_bind_left: 0
 
-  diode_via_shift_x: diode_size_yo + 0.6
-  diode_via_shift_y: diode_shift_y
-
-  via_row_net_shift_x: 0
-  via_row_net_shift_y: 2.5
-  via_colrow_shift_x: 0
-  via_colrow_shift_y: -2.5
-  via_col_net_shift_x: 0
-  via_col_net_shift_y: -3.6
+  #   diode_via_shift_x: diode_size_yo + 0.6
+  #   diode_via_shift_y: diode_shift_y
+  #
+  #   via_row_net_shift_x: 0
+  #   via_row_net_shift_y: 2.5
+  #   via_colrow_shift_x: 0
+  #   via_colrow_shift_y: -2.5
+  #   via_col_net_shift_x: 0
+  #   via_col_net_shift_y: -3.6
 
   # ------------------- MCU -------------------- #
   mcu_shift_x: 0
@@ -295,12 +306,12 @@ units:
   oled_shift_y: mcu_size_yo - (oled_size_yo + oled_jumper_y + 1)
 
   # OLED vias
-  oled_mosi_via_shift_x: 4.45
-  oled_mosi_via_shift_y: -(oled_size_yo - 5.55)
-  oled_cs_via_shift_x: 3.85
-  oled_cs_via_shift_y: -(oled_size_yo - 3.95) # oled_mosi_via_shift_y - 0.9
-  oled_sck_via_shift_y: -(oled_size_yo - 3.95)
-  oled_gnd_via_shift_y: oled_sck_via_shift_y - 1
+  # oled_mosi_via_shift_x: 4.45
+  # oled_mosi_via_shift_y: -(oled_size_yo - 5.55)
+  # oled_cs_via_shift_x: 3.85
+  # oled_cs_via_shift_y: -(oled_size_yo - 3.95) # oled_mosi_via_shift_y - 0.9
+  # oled_sck_via_shift_y: -(oled_size_yo - 3.95)
+  # oled_gnd_via_shift_y: oled_sck_via_shift_y - 1
 
   # --------------- Power Switch --------------- #
   power_shift_x: 0 #0.9
@@ -330,8 +341,6 @@ units:
   tp_reset_rotate: 180
 
   # TP FFC connector (Molex 2005280120)
-  tp_ffc_size_x: 18
-  tp_ffc_size_y: 5.3
   tp_ffc_shift_x: 0
   tp_ffc_shift_y: -mcu_size_y
   tp_ffc_rotate: 0 # connector +y (ribbon side) must face the stick
@@ -344,21 +353,52 @@ units:
   hole_radius_mount: 2.1
 
   # Hole Positions
-  hole_key_shift: key_size_yo + hole_radius_mount
+  # hole_key_shift: key_size_yo + hole_radius_mount
   hole_thumb_shift: 18.5/4 #9.25
   hole_tp_shift_x: 0
   hole_tp_shift_y: (tp_size_yo - hole_radius_mount)
 
   # -------------- Board Outline --------------- #
   # >>> Unibody Bridge <<<
-  top_rect_shift_y: 14.5
+  top_rect_margin: 2 # Bridge top edge above the MCU
 
-  # Circle
-  bot_crcl_radius: 80
-  bot_crcl_radius_dp: bot_crcl_radius - 2
-  bot_crcl_radius_tp: bot_crcl_radius - 4
+  # Circle: passes through the lowest corner of each thumb_in padded square
+  # (distance arc_a from the axis, height arc_k_y) and the apex (arc_apex).
+  # All heights are relative to ref_bottom_center.
+  arc_f: -mirror_angle # c4/c5/thumb frame (pinky/ring splays cancel the matrix rotation)
+  arc_out: arc_f + thumb_out_splay
+  arc_in: arc_out + thumb_in_splay
+  # Units must stay plain numbers: the web GUI cannot clone function values.
+  arc_cf: cos(arc_f deg)
+  arc_sf: sin(arc_f deg)
+  arc_co: cos(arc_out deg)
+  arc_so: sin(arc_out deg)
+  arc_ci: cos(arc_in deg)
+  arc_si: sin(arc_in deg)
+
+  # mirror axis (minus D/2) and matrix_c5_r1, both relative to matrix_c4_r3
+  arc_axis_x: (key_col_spread + 0.5(mirror_shift)) arc_cf - (inner_col_stagger + 2(key_row_padding) + 0.5(mirror_shift)) arc_sf
+  arc_c5_y: key_col_spread arc_sf + (inner_col_stagger + 2(key_row_padding)) arc_cf
+  # thumb_in relative to matrix_c4_r3
+  arc_th_x: thumb_offset_x arc_cf - thumb_offset_y arc_sf + thumb_in_spread arc_co - thumb_col_stagger arc_so
+  arc_th_y: thumb_offset_x arc_sf + thumb_offset_y arc_cf + thumb_in_spread arc_so + thumb_col_stagger arc_co
+
+  arc_clear: 1 # Bridge bottom edge below the lowest component
+  arc_rtc_y: arc_c5_y - arc_th_y - 0.75(key_size_y) + key_size_yo # ref_top_center
+  # Lowest corner of thumb_in's padded square: arc_a from the axis, arc_k_y high
+  arc_a: arc_axis_x - arc_th_x - (0.5(key_pad_x) arc_ci + 0.5(key_pad_y) arc_si) + mirror_distance/2
+  arc_k_y: key_size_yo + 0.5(key_pad_x) arc_si - 0.5(key_pad_y) arc_ci
+  # Apex: lowest of power toggle (0.625 = toggle width 1.25 / 2) and reset
+  arc_apex: arc_rtc_y + min(power_shift_y - power_size_xo - 0.625, reset_shift_y - reset_size_yo) - arc_clear
+  arc_top: arc_rtc_y + mcu_shift_y + mcu_size_yo + top_rect_margin
+
+  arc_s: arc_apex - arc_k_y
+  bot_crcl_radius: (arc_a^2 + arc_s^2)/(2 arc_s)
+  bot_crcl_wall: 2 # Case wall step: panel_dp = +1 wall, panel_tp = +2 walls
+  bot_crcl_radius_dp: bot_crcl_radius - bot_crcl_wall
+  bot_crcl_radius_tp: bot_crcl_radius - 2(bot_crcl_wall)
   bot_crcl_shift_x: 0
-  bot_crcl_shift_y: -(bot_crcl_radius) + 10 # 14 (MX)
+  bot_crcl_shift_y: arc_apex - bot_crcl_radius
 
   # ------------ Battery Rectangle ------------- #
   bat_rect_size_x: 50
@@ -394,12 +434,11 @@ points.zones:
         mirror.row_net: R6
       r2: # Home
         row_net: R2
-        mirror.row_net: R4
+        mirror.row_net: R5
       r1: # Top
         row_net: R1
         mirror.row_net: R4
     columns:
-      # Pinky
       c1:
         key:
           tags:
@@ -414,7 +453,6 @@ points.zones:
           r1:
             column_net: C1
             mirror.column_net: C1
-      # Ring
       c2:
         key:
           tags:
@@ -438,7 +476,7 @@ points.zones:
         key:
           tags:
             - key
-            - r2dle
+            - middle
             - non_tp
           stagger: middle_col_stagger
           splay: -ring_splay
@@ -463,6 +501,8 @@ points.zones:
             - index
             - non_tp
           stagger: index_col_stagger
+          splay: -middle_splay
+          origin: [0, middle_adj]
         rows:
           r3:
             bind: [0, 0, key_size_y, 0]
@@ -633,8 +673,8 @@ points.zones:
   trackpoint_ffc:
     key:
       tags: part
-      width: tp_ffc_size_x
-      height: tp_ffc_size_y
+      width: ffc_size_x
+      height: ffc_size_y
     anchor:
       ref: mcu
       shift: [tp_ffc_shift_x, tp_ffc_shift_y]
@@ -858,7 +898,7 @@ outlines:
       size: [tp_reset_size_x, tp_reset_size_y]
       where: [trackpoint_reset]
     - what: rectangle # TP FFC connector
-      size: [tp_ffc_size_x, tp_ffc_size_y]
+      size: [ffc_size_x, ffc_size_y]
       where: [trackpoint_ffc]
 
   # -------------- Mounting Holes -------------- #
@@ -890,19 +930,19 @@ outlines:
   _center_rect:
     - what: rectangle
       where: &center_rect
-        ref: [mcu]
-        shift: [0, -top_rect_shift_y + 2.0]
-      size: [6.25(key_size_x), mcu_size_y + 2(top_rect_shift_y)]
+        ref: ref_bottom_center
+        shift: [0, (arc_k_y + arc_top)/2]
+      size: [2(arc_a), arc_top - arc_k_y]
   _center_rect_dp:
     - what: rectangle
       where:
         <<: *center_rect
-      size: [6.25(key_size_x), mcu_size_y + 2.25(top_rect_shift_y)]
+      size: [2(arc_a) + 2(bot_crcl_wall), arc_top - arc_k_y + 2(bot_crcl_wall)]
   _center_rect_tp:
     - what: rectangle
       where:
         <<: *center_rect
-      size: [6.25(key_size_x), mcu_size_y + 2.5(top_rect_shift_y)]
+      size: [2(arc_a) + 4(bot_crcl_wall), arc_top - arc_k_y + 4(bot_crcl_wall)]
 
   _bottom_arc:
     - what: circle
@@ -1030,7 +1070,7 @@ pcbs.jacked_rufous:
   footprints:
     # ------------------ MCU ------------------- #
     mcu:
-      what: mcu_xiao_nrf52840_plus
+      what: kb_footprints/ergogen/mcu_xiao_nrf52840_plus
       where: mcu
       # the footprint origin is the pad-row centre,
       # 0.075 mm off the old xiao_plus origin
@@ -1067,11 +1107,13 @@ pcbs.jacked_rufous:
         D12: R1
         D13: R2
         D14: R3
-        D15: ""
         D17: R4
         D18: R5
         D2: R6
-        D3: ""
+
+        # Roller encoder channels
+        D15: RE_A
+        D3: RE_B
 
         # Reset
         RST: RST
@@ -1102,7 +1144,7 @@ pcbs.jacked_rufous:
     # -------------- Power Switch -------------- #
     power:
       what: ceoloide/power_switch_smd_side
-      where: [power]
+      where: power
       params:
         from: pos
         to: RAW
@@ -1113,7 +1155,7 @@ pcbs.jacked_rufous:
         include_courtyard: false
     power_pos_route: &power_route
       what: ceoloide/utility_router
-      where: [power]
+      where: power
       params:
         net: pos
         route: "f(-1.75, 2.25)(-0.65, 2.25)v(-1.75, 2.25)"
@@ -1181,24 +1223,23 @@ pcbs.jacked_rufous:
           ["b(-1.0, 2.82)(0, 1.5)(0, -1.25)v", "f(0, -1.25)(0, 1.5)(1.0, 2.82)"]
 
     # -------------- Scrollwheel --------------- #
-    # scrollwheel:
-    #   what: scrollwheel #scrollwheel_minimal
-    #   where:
-    #     ref: matrix_c5_r1
-    #     shift: [1.1, 0.875]
-    #     rotate: 180
-    #   params:
-    #     reverse: true
-    #     from: C5
-    #     to: R1
-    #     A: SW1
-    #     B: GND
-    #     C: SW2
-    #     D: ''
+    scrollwheel:
+      what: kb_footprints/ergogen/encoder_roller
+      where:
+        ref: thumb_in
+        shift: [key_size_x, key_size_y]
+        rotate: 90
+      params:
+        reversible: true
+        S1: C5 # push switch: column net
+        S2: R1 # push switch: row net (the footprint doc says diode net)
+        A: RE_A # encoder channels: MCU D15 / D3
+        B: RE_B
+        C: GND # common
 
     # --------------- Trackpoint --------------- #
     tp_stick:
-      what: trackpoint_mount # trackpoint_stick
+      what: kb_footprints/ergogen/trackpoint_mount # trackpoint_stick
       where:
         ref: trackpoint
         rotate: 180
@@ -1210,7 +1251,7 @@ pcbs.jacked_rufous:
         # include_pads: false # the FFC connector carries the signals now
 
     tp_ffc:
-      what: conn_ffc_molex_12p
+      what: kb_footprints/ergogen/conn_ffc_molex_12p
       where: trackpoint_ffc
       params:
         # side: F # fingers face the PCB (bottom contact); confirm with the ribbon
@@ -1223,7 +1264,7 @@ pcbs.jacked_rufous:
         pin_8: TPC
 
     tp_reset:
-      what: trackpoint_reset
+      what: kb_footprints/ergogen/trackpoint_reset
       where: trackpoint_reset
       params:
         side: F
@@ -1608,31 +1649,6 @@ pcbs.jacked_rufous:
             "f(-14.0, -2.75)(-17.75, -1.75)",
           ]
 
-        # routes:
-        #   [
-        #     "f(7.5, -4.0)(9.25, -6.0)",
-        #     "f(9.25, -6.0)(12.125, -5.75)",
-        #     "f(12.125, -5.75)(13.5, -3.25)",
-        #   ]
-    # key_row_net_mirror_c3_c4_route:
-    #   what: ceoloide/utility_router
-    #   where:
-    #     - /mirror.*c3/
-    #     - /mirror.*c4_r[1,2]$/
-    #   params:
-    #     net: "{{row_net}}"
-    #     routes:
-    #       [
-    #         "f(2.75, -3.5)(2.0, -4.75)",
-    #         "f(2.0, -4.75)(-2.75, -4.75)",
-    #         "f(-2.75, -4.75)(-3.75, -3.5)",
-    #         "f(-3.75, -3.5)(-3.75, 0.625)",
-    #         "f(-3.75, 0.625)(-4.375, 1.25)",
-    #         "f(-4.375, 1.25)(-9.25, 1.25)",
-    #         "f(-9.25, 1.25)(-11.25, 3.7)",
-    #         "f(-11.25, 3.7)(-15.5, 3.7)",
-    #       ]
-
     # ----------------- Diodes ----------------- #
     diode:
       what: ceoloide/diode_tht_sod123
@@ -1673,15 +1689,11 @@ pcbs.jacked_rufous:
         net: "{{colrow}}"
         route: "b(-1.5, -3.5)(-2.75, -3.5)v"
 
-    # -------------- Trace Routes -------------- #
-
     # ------------- M2 Screw Holes ------------- #
     holes_mount:
       what: ceoloide/mounting_hole_plated
       where: [hole]
       #include_courtyard: false
-
-    # ------------ Key Trace Routes ------------ #
 
 # ---------------------------------------------- #
 #                     CASES                      #
