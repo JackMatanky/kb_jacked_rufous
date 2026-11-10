@@ -1,3 +1,6 @@
 [submodule "footprints/ceoloide"]
 	path = footprints/ceoloide
 	url = https://github.com/ceoloide/ergogen-footprints.git
+[submodule "kb_footprints"]
+	path = ergogen/footprints/kb_footprints
+	url = ssh://git@codeberg.org/JackMatanky/kb_footprints.git
