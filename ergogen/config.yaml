@@ -151,11 +151,13 @@ presets:
       mcu_size_y: 34.1
       mcu_usb_conn_size_x: 8.94
       mcu_usb_conn_size_y: 7.35
-    xiao: # XIAO nRF52840: 20 x 17.5 x 3.3 (mm)
-      mcu_size_x: 20
-      mcu_size_y: 17.5
+      mcu_usb_conn_shift_y: 1.524 # USB-C tip beyond the controller edge: footprint USB outline 18.034 - controller outline 16.51
+    xiao: # XIAO nRF52840 Plus module body: 17.78 x 20.955 mm (footprint BOX.body)
+      mcu_size_x: 17.78
+      mcu_size_y: 20.955
       mcu_usb_conn_size_x: 8.94
       mcu_usb_conn_size_y: 7.35
+      mcu_usb_conn_shift_y: 1.51 # USB-C tip beyond the module edge: footprint BOX.usb.top - BOX.body.top (12.051 - 10.541)
 
   display:
     nice_view: # nice!view: 36 x 14 x 2.9 (mm)
@@ -299,7 +301,7 @@ units:
 
   # ------------------- MCU -------------------- #
   mcu_shift_x: 0
-  mcu_shift_y: -power_size_x # Adjust vertical shift for XIAO length
+  mcu_shift_y: -power_size_x - 0.0635 # -0.0635: footprint origin (pad-row centre) is 0.0635 below the module body centre
 
   # --------------- OLED Display --------------- #
   oled_shift_x: -(oled_screen_offset_x)/2
@@ -360,7 +362,7 @@ units:
 
   # -------------- Board Outline --------------- #
   # >>> Unibody Bridge <<<
-  top_rect_margin: 2 # Bridge top edge above the MCU
+  top_rect_margin: 0 # Bridge top edge beyond the USB-C tip; 0 = flush
 
   # Circle: passes through the lowest corner of each thumb_in padded square
   # (distance arc_a from the axis, height arc_k_y) and the apex (arc_apex).
@@ -390,7 +392,7 @@ units:
   arc_k_y: key_size_yo + 0.5(key_pad_x) arc_si - 0.5(key_pad_y) arc_ci
   # Apex: lowest of power toggle (0.625 = toggle width 1.25 / 2) and reset
   arc_apex: arc_rtc_y + min(power_shift_y - power_size_xo - 0.625, reset_shift_y - reset_size_yo) - arc_clear
-  arc_top: arc_rtc_y + mcu_shift_y + mcu_size_yo + top_rect_margin
+  arc_top: arc_rtc_y + mcu_shift_y + mcu_size_yo + mcu_usb_conn_shift_y + top_rect_margin
 
   arc_s: arc_apex - arc_k_y
   bot_crcl_radius: (arc_a^2 + arc_s^2)/(2 arc_s)
@@ -790,7 +792,7 @@ outlines:
       fillet: 0.1
       operation: stack
       adjust:
-        shift: [0, mcu_size_yo - mcu_usb_conn_size_y/2 + 0.7]
+        shift: [0, mcu_size_yo - mcu_usb_conn_size_y/2 + mcu_usb_conn_shift_y]
 
   # OLED Display
   _oled:
@@ -1072,9 +1074,6 @@ pcbs.jacked_rufous:
     mcu:
       what: kb_footprints/ergogen/mcu_xiao_nrf52840_plus
       where: mcu
-      # the footprint origin is the pad-row centre,
-      # 0.075 mm off the old xiao_plus origin
-      adjust.shift: [0, -0.075]
       params:
         reversible: true
 
