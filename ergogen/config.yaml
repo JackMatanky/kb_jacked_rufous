@@ -152,7 +152,7 @@ presets:
       mcu_size_x: 18.3
       mcu_size_y: 33
       mcu_usb_conn_overhang: 1.1
-    xiao: # XIAO nRF52840: 17.8 x 21 (mm)
+    xiao: # XIAO nRF52840: 17.8 x 21 x 5 (mm)
       mcu_size_x: 17.8
       mcu_size_y: 21
       mcu_usb_conn_overhang: 1.51
@@ -256,7 +256,8 @@ presets:
       tp_hex_side_size: 6
       tp_hex_size_y: 2(tp_hex_diag_size) + tp_hex_side_size
       tp_hex_size_yo: tp_hex_size_y/2
-      tp_hole_radius_stick: 3.7
+      tp_stick_hole_radius: 2.1
+      tp_cap_hole_radius: 3.7
 
   vik_connector:
     horizontal:
@@ -321,16 +322,6 @@ units:
   thumb_in_bind_bot: 0
   thumb_in_bind_left: 0
 
-  #   diode_via_shift_x: diode_size_yo + 0.6
-  #   diode_via_shift_y: diode_shift_y
-  #
-  #   via_row_net_shift_x: 0
-  #   via_row_net_shift_y: 2.5
-  #   via_colrow_shift_x: 0
-  #   via_colrow_shift_y: -2.5
-  #   via_col_net_shift_x: 0
-  #   via_col_net_shift_y: -3.6
-
   # ------------------- MCU -------------------- #
   mcu_shift_x: 0
   mcu_shift_y: -power_size_x - 0.0635 # -0.0635: footprint origin (pad-row centre) is 0.0635 below the module body centre
@@ -338,14 +329,6 @@ units:
   # --------------- OLED Display --------------- #
   oled_shift_x: -(oled_screen_offset_x)/2
   oled_shift_y: mcu_size_yo - (oled_size_yo + oled_jumper_y + 1)
-
-  # OLED vias
-  # oled_mosi_via_shift_x: 4.45
-  # oled_mosi_via_shift_y: -(oled_size_yo - 5.55)
-  # oled_cs_via_shift_x: 3.85
-  # oled_cs_via_shift_y: -(oled_size_yo - 3.95) # oled_mosi_via_shift_y - 0.9
-  # oled_sck_via_shift_y: -(oled_size_yo - 3.95)
-  # oled_gnd_via_shift_y: oled_sck_via_shift_y - 1
 
   # --------------- Power Switch --------------- #
   power_shift_x: 0 #0.9
@@ -427,12 +410,12 @@ units:
   arc_top: arc_rtc_y + mcu_shift_y + mcu_size_yo + mcu_usb_conn_overhang + top_rect_margin
 
   arc_s: arc_apex - arc_k_y
-  bot_crcl_radius: (arc_a^2 + arc_s^2)/(2 arc_s)
-  bot_crcl_wall: 2 # Case wall step: panel_dp = +1 wall, panel_tp = +2 walls
-  bot_crcl_radius_dp: bot_crcl_radius - bot_crcl_wall
-  bot_crcl_radius_tp: bot_crcl_radius - 2(bot_crcl_wall)
-  bot_crcl_shift_x: 0
-  bot_crcl_shift_y: arc_apex - bot_crcl_radius
+  bottom_arc_radius: (arc_a^2 + arc_s^2)/(2 arc_s)
+  bottom_arc_wall: 2 # Case wall step: panel_dp = +1 wall, panel_tp = +2 walls
+  bottom_arc_radius_dp: bottom_arc_radius - bottom_arc_wall
+  bottom_arc_radius_tp: bottom_arc_radius - 2(bottom_arc_wall)
+  bottom_arc_shift_x: 0
+  bottom_arc_shift_y: arc_apex - bottom_arc_radius
 
   # ------------ Battery Rectangle ------------- #
   bat_rect_size_x: 50
@@ -893,11 +876,11 @@ outlines:
   _tp_stick_hole:
     - what: circle
       where: [trackpoint]
-      radius: hole_radius_mount
-  _tp_key_hole:
+      radius: tp_stick_hole_radius
+  _tp_cap_hole:
     - what: circle
       where: [trackpoint]
-      radius: tp_hole_radius_stick
+      radius: tp_cap_hole_radius
   _trackpoint:
     - what: rectangle # TP Length
       size: [tp_mount_size_x, tp_size_y]
@@ -922,7 +905,7 @@ outlines:
           shift: [-tp_mount_size_xo, tp_hex_size_yo]
     - name: _tp_stick_hole
       operation: stack
-    - name: _tp_key_hole
+    - name: _tp_cap_hole
       operation: stack
     - name: _tp_holes_mount
       operation: stack
@@ -971,27 +954,29 @@ outlines:
     - what: rectangle
       where:
         <<: *center_rect
-      size: [2(arc_a) + 2(bot_crcl_wall), arc_top - arc_k_y + 2(bot_crcl_wall)]
+      size:
+        [2(arc_a) + 2(bottom_arc_wall), arc_top - arc_k_y + 2(bottom_arc_wall)]
   _center_rect_tp:
     - what: rectangle
       where:
         <<: *center_rect
-      size: [2(arc_a) + 4(bot_crcl_wall), arc_top - arc_k_y + 4(bot_crcl_wall)]
+      size:
+        [2(arc_a) + 4(bottom_arc_wall), arc_top - arc_k_y + 4(bottom_arc_wall)]
 
   _bottom_arc:
     - what: circle
-      radius: bot_crcl_radius
+      radius: bottom_arc_radius
       where: &bottom_arc
         ref: ref_bottom_center
-        shift: [bot_crcl_shift_x, bot_crcl_shift_y]
+        shift: [bottom_arc_shift_x, bottom_arc_shift_y]
   _bottom_arc_dp:
     - what: circle
-      radius: bot_crcl_radius_dp
+      radius: bottom_arc_radius_dp
       where:
         <<: *bottom_arc
   _bottom_arc_tp:
     - what: circle
-      radius: bot_crcl_radius_tp
+      radius: bottom_arc_radius_tp
       where:
         <<: *bottom_arc
 
