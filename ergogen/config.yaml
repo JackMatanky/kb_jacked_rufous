@@ -366,6 +366,8 @@ units:
   enc_shift_x: key_size_x
   enc_shift_y: key_size_y
   enc_rotate: 90
+  enc_diode_shift_x: -5.925
+  enc_diode_shift_y: -9
 
   # ------------- PCB & Case Holes ------------- #
   # Points height and width
@@ -432,6 +434,14 @@ units:
 # ---------------------------------------------- #
 #                     POINTS                     #
 # ---------------------------------------------- #
+# Charlieplex nets. Each key's switch connects drive pin `from_net` (P1..P7) to its
+# diode anode; the diode cathode goes to node `to_net` (K1..K7), and a charlie diode
+# (Kn -> Pn) returns the node to its pin. (from_net, to_net) pairs must be unique and
+# never share an index.
+#   - Columns share one drive pin across both halves, so mirror.from_net is absent.
+#   - Rows share a node per half (left r1=K6, r2=K7, r3=K1; right r1=K2, r2=K3, r3=K5),
+#     so every mirror.to_net is required.
+#   - Four keys deviate to K4 because a pin cannot pair with its own node.
 points.zones:
   # ----------- Base Keyboard Matrix ----------- #
   matrix:
@@ -452,14 +462,14 @@ points.zones:
       # bind: [top, right, bottom, left]
     rows:
       r3: # Bottom
-        to_net: R3
-        mirror.to_net: R6
+        to_net: K1
+        mirror.to_net: K5
       r2: # Home
-        to_net: R2
-        mirror.to_net: R5
+        to_net: K7
+        mirror.to_net: K3
       r1: # Top
-        to_net: R1
-        mirror.to_net: R4
+        to_net: K6
+        mirror.to_net: K2
     columns:
       c1:
         key:
@@ -470,11 +480,9 @@ points.zones:
         rows:
           r3.skip: true
           r2:
-            from_net: C1
-            mirror.from_net: C1
+            from_net: P1
           r1:
-            from_net: C1
-            mirror.from_net: C1
+            from_net: P1
       c2:
         key:
           tags:
@@ -486,14 +494,13 @@ points.zones:
           origin: [0, pinky_adj]
         rows:
           r3:
-            from_net: C1
-            mirror.from_net: C1
+            from_net: P1
+            to_net: K4
           r2:
-            from_net: C2
-            mirror.from_net: C2
+            from_net: P2
           r1:
-            from_net: C2
-            mirror.from_net: C2
+            from_net: P2
+            mirror.to_net: K4
       c3:
         key:
           tags:
@@ -506,16 +513,14 @@ points.zones:
         rows:
           r3:
             bind: [key_size_yo, key_size_xo, 0, key_size_xo]
-            from_net: C2
-            mirror.from_net: C2
+            from_net: P2
           r2:
             bind: [0, key_size_xo, 0, 0]
-            from_net: C3
-            mirror.from_net: C3
+            from_net: P3
+            mirror.to_net: K4
           r1:
             bind: [0, 0, key_size_yo, 0]
-            from_net: C3
-            mirror.from_net: C3
+            from_net: P3
       c4:
         key:
           tags:
@@ -528,14 +533,11 @@ points.zones:
         rows:
           r3:
             bind: [0, 0, key_size_y, 0]
-            from_net: C3
-            mirror.from_net: C3
+            from_net: P3
           r2:
-            from_net: C4
-            mirror.from_net: C4
+            from_net: P4
           r1:
-            from_net: C4
-            mirror.from_net: C4
+            from_net: P4
       c5:
         key:
           tags:
@@ -546,11 +548,9 @@ points.zones:
           r3.skip: true
           r2:
             bind: [key_size_yo, 0, key_size_yo, key_size_xo]
-            from_net: C5
-            mirror.from_net: C5
+            from_net: P5
           r1:
-            from_net: C5
-            mirror.from_net: C5
+            from_net: P5
   thumb:
     mirror.$extends: points.zones.matrix.mirror
     key:
@@ -563,16 +563,15 @@ points.zones:
       ref: matrix_c4_r3
       shift: [thumb_offset_x, thumb_offset_y]
     rows.home:
-      to_net: R3
-      mirror.to_net: R6
+      to_net: K1
+      mirror.to_net: K5
     columns:
       # Pinky side (tucky)
       out.key:
         name: thumb_out
         splay: thumb_out_splay
         bind: [key_size_yo, key_size_xo, 0, 0]
-        from_net: C4
-        mirror.from_net: C4
+        from_net: P4
       # Inner side (reachy)
       in.key:
         name: thumb_in
@@ -586,8 +585,9 @@ points.zones:
             thumb_in_bind_bot,
             thumb_in_bind_left,
           ]
-        from_net: C5
-        mirror.from_net: C5
+        from_net: P5
+      # Row-level override: rows take precedence over column keys, so the mirrored to_net deviation lives here
+      in.rows.home.mirror.to_net: K4
 
   ref_top_center:
     anchor:
@@ -705,8 +705,8 @@ points.zones:
     key:
       name: encoder
       colrow: encoder
-      from_net: C5 # becomes P6 in the charlie step
-      to_net: R1 # becomes K7 in the charlie step
+      from_net: P6
+      to_net: K7
     anchor:
       ref: thumb_in
       shift: [enc_shift_x, enc_shift_y]
@@ -1118,33 +1118,32 @@ pcbs.jacked_rufous:
         include_battery_traces: true
         include_traces_vias: true
 
-        # TrackPoint PS/2
-        D0: TPD
-        D1: TPC
+        # Switch matrix drive pins (charlieplex; P7 is a node-only pin)
+        D0: P1
+        D1: P2
+        D2: P3
+        D3: P4
+        D4: P5
+        D5: P6
+        D6: P7
 
-        # Switch matrix columns
-        D4: C1
-        D5: C2
-        D6: C3
-        D7: C4
-        D11: C5
+        # Charlieplex interrupt (wakes the MCU on any press)
+        D7: INT
 
         # nice!view SPI
         D8: SCK
         D9: CS
         D10: MOSI
 
-        # Switch matrix rows
-        D12: R1
-        D13: R2
-        D14: R3
-        D17: R4
-        D18: R5
-        D2: R6
+        # TrackPoint PS/2
+        D11: TPD
+        D12: TPC
 
         # Roller encoder channels
-        D15: RE_A
-        D3: RE_B
+        D14: RE_A
+        D15: RE_B
+
+        # Spare pads, left at their defaults: D13, D17, D18, D19
 
         # Reset
         RST: RST
@@ -1260,10 +1259,21 @@ pcbs.jacked_rufous:
       params:
         reversible: true
         S1: "{{from_net}}" # push switch: from net
-        S2: "{{to_net}}" # push switch: diode net
-        A: RE_A # encoder channels: MCU D15 / D3
+        S2: "{{colrow}}" # push switch: diode anode net
+        A: RE_A # encoder channels: MCU D14 / D15
         B: RE_B
         C: GND # common
+
+    encoder_diode:
+      what: ceoloide/diode_tht_sod123
+      where: encoder
+      adjust.shift: [enc_diode_shift_x, enc_diode_shift_y]
+      params:
+        from: "{{colrow}}"
+        to: "{{to_net}}"
+        side: "B"
+        reversible: false
+        include_tht: false
 
     # --------------- Trackpoint --------------- #
     tp_stick:
@@ -1495,187 +1505,188 @@ pcbs.jacked_rufous:
       params:
         net: "{{from_net}}"
         route: "b(3.25, 5.875)(2.5, 33.0)(4.5, 38.0)"
-    key_to_net_diode_top_route:
-      what: ceoloide/utility_router
-      where:
-        - /^matrix.*c2_r[12]/
-        - /^matrix.*c[3-5]/
-        - /^thumb_in/
-        - /mirror.*c[1-3]/
-        - /mirror.*c4_r[12]/
-        - /mirror_thumb_out/
-      params:
-        net: "{{to_net}}"
-        route: "f(2.875, -3.5)(2.0, -4.625)(-2.625, -4.625)"
-    key_to_net_diode_left_start_route:
-      what: ceoloide/utility_router
-      where:
-        - /c3/
-        - /^matrix.*c2_r[12]/
-        - /mirror.*c4_r[12]$/
-      params:
-        net: "{{to_net}}"
-        routes:
-          [
-            "f(-2.625, -4.625)(-3.5, -3.5)(-3.5, 0.625)",
-            "f(-3.5, 0.625)(-4.25, 1.375)",
-            "f(-4.25, 1.375)(-6.5, 1.375)",
-            "f(-6.5, 1.375)(-7.375, 2.125)",
-            "f(-7.375, 2.125)(-9.75, 2.125)",
-            "f(-9.75, 2.125)(-10.375, 3.0)",
-          ]
-    key_to_net_diode_left_mid_route:
-      what: ceoloide/utility_router
-      where:
-        - /^matrix.*c2_r[12]/
-        - /mirror.*c3/
-        - /mirror.*c4_r[12]/
-      params:
-        net: "{{to_net}}"
-        route: "f(-10.375, 3.0)(-11.0, 3.75)"
-    key_to_net_diode_right_start_route:
-      what: ceoloide/utility_router
-      where:
-        - /c3/
-        - /^matrix_c4_r[12]$/
-        - /mirror.*_c2_r[12]$/
-      params:
-        net: "{{to_net}}"
-        routes:
-          [
-            "f(2.75, -3.5)(3.625, -2.5)",
-            "f(3.625, -2.5)(3.625, 0.625)",
-            "f(3.625, 0.625)(5.25, 2.25)",
-          ]
-    key_to_net_diode_right_mid_route:
-      what: ceoloide/utility_router
-      where:
-        - /^matrix_c4_r[12]$/
-        - /mirror.*_c2_r[12]$/
-      params:
-        net: "{{to_net}}"
-        route: "f(5.25, 2.25)(5.25, 4.75)(7.0, 6.175)"
-    key_to_net_matrix_c1_c2_start_route:
-      what: ceoloide/utility_router
-      where: /^matrix.*_c1/
-      params:
-        net: "{{to_net}}"
-        route: "f(2.875, -3.5)(7.5, -3.5)"
-    key_to_net_mirror_c1_c2_start_route:
-      what: ceoloide/utility_router
-      where: /mirror.*_c1/
-      params:
-        net: "{{to_net}}"
-        route: "f(-2.625, -4.625)(-11.875, -4.625)"
-    key_to_net_matrix_c1_c2_r1_route:
-      what: ceoloide/utility_router
-      where: /^matrix.*_c1_r1/
-      params:
-        net: "{{to_net}}"
-        routes:
-          [
-            "f(7.5, -3.5)(8.5, -3.5)",
-            "f(8.5, -3.5)(10.25, -5.25)",
-            "f(10.25, -5.25)(10.5, -7.8)",
-          ]
-    key_to_net_mirror_c1_c2_r1_route:
-      what: ceoloide/utility_router
-      where: /mirror.*_c1_r1/
-      params:
-        net: "{{to_net}}"
-        route: "f(-11.875, -4.625)(-13.625, -4.625)(-14.25, -5.075)"
-    key_to_net_matrix_c1_c2_r2_route:
-      what: ceoloide/utility_router
-      where: /^matrix.*_c1_r2/
-      params:
-        net: "{{to_net}}"
-        route: "f(7.5, -3.5)(9.0, -5.25)(9.0, -7.9)"
-    key_to_net_mirror_c1_c2_r2_route:
-      what: ceoloide/utility_router
-      where: /mirror.*_c1_r2/
-      params:
-        net: "{{to_net}}"
-        route: "f(-11.875, -4.625)(-12.75, -5.17)"
-    key_to_net_matrix_c2_c3_start_route:
-      what: ceoloide/utility_router
-      where: /^matrix.*_c2/
-      params:
-        net: "{{to_net}}"
-        route: "f(2.875, -3.5)(8.375, -3.5)"
-    key_to_net_mirror_c2_c3_start_route:
-      what: ceoloide/utility_router
-      where: /mirror.*_c2/
-      params:
-        net: "{{to_net}}"
-        route: "f(-2.625, -4.625)(-13.5, -4.0)"
-    key_to_net_matrix_c2_c3_r1_route:
-      what: ceoloide/utility_router
-      where: /^matrix.*_c2_r1/
-      params:
-        net: "{{to_net}}"
-        route: "f(8.375, -3.5)(10.25, -3.5)"
-    key_to_net_mirror_c2_c3_r1_route:
-      what: ceoloide/utility_router
-      where: /mirror.*_c2_r1/
-      params:
-        net: "{{to_net}}"
-        route: "f(-13.5, -4.0)(-15.5, -4.0)"
-    key_to_net_matrix_c2_c3_r2_route:
-      what: ceoloide/utility_router
-      where: /^matrix.*_c2_r2/
-      params:
-        net: "{{to_net}}"
-        route: "f(8.375, -3.5)(9.25, -3.5)"
-    key_to_net_mirror_c2_c3_r2_route:
-      what: ceoloide/utility_router
-      where: /mirror.*_c2_r2/
-      params:
-        net: "{{to_net}}"
-        route: "f(-13.5, -4.0)(-14.5, -4.0)"
-    key_to_net_matrix_c3_c4_route:
-      what: ceoloide/utility_router
-      where: /^matrix_c3/
-      params:
-        net: "{{to_net}}"
-        route: "f(5.25, 2.25)(15.9, 2.575)"
-    key_to_net_mirror_c3_c4_route:
-      what: ceoloide/utility_router
-      where: /mirror.*_c3/
-      params:
-        net: "{{to_net}}"
-        route: "f(-11.0, 3.75)(-15.875, 3.75)"
-    key_to_net_matrix_c4_c5_route:
-      what: ceoloide/utility_router
-      where: /^matrix_c4_r[12]/
-      params:
-        net: "{{to_net}}"
-        routes:
-          [
-            "f(5.25, 2.25)(5.25, 4.75)",
-            "f(5.25, 4.75)(7.0, 6.175)",
-            "f(7.0, 6.175)(15.8, 6.175)",
-          ]
-    key_to_net_mirror_c4_c5_route:
-      what: ceoloide/utility_router
-      where: /mirror.*_c4_r[12]/
-      params:
-        net: "{{to_net}}"
-        route: "f(-11.0, 3.75)(-11.0, 5.75)(-12.5, 7.25)(-15.875, 7.25)"
-    key_to_net_thumb_start_route:
-      what: ceoloide/utility_router
-      where:
-        - /^thumb_in/
-        - /mirror_thumb_out/
-      params:
-        net: "{{to_net}}"
-        routes:
-          [
-            "f(-2.625, -4.625)(-7.5, -4.625)",
-            "f(-7.5, -4.625)(-10.0, -6.0)",
-            "f(-10.0, -6.0)(-11.75, -5.625)",
-            "f(-11.75, -5.625)(-14.0, -2.75)",
-            "f(-14.0, -2.75)(-17.75, -1.75)",
-          ]
+    # Row routes encoded the old R1..R6 rows; kept for reference, re-derive in KiCad for the K nodes.
+    # key_to_net_diode_top_route:
+    #   what: ceoloide/utility_router
+    #   where:
+    #     - /^matrix.*c2_r[12]/
+    #     - /^matrix.*c[3-5]/
+    #     - /^thumb_in/
+    #     - /mirror.*c[1-3]/
+    #     - /mirror.*c4_r[12]/
+    #     - /mirror_thumb_out/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(2.875, -3.5)(2.0, -4.625)(-2.625, -4.625)"
+    # key_to_net_diode_left_start_route:
+    #   what: ceoloide/utility_router
+    #   where:
+    #     - /c3/
+    #     - /^matrix.*c2_r[12]/
+    #     - /mirror.*c4_r[12]$/
+    #   params:
+    #     net: "{{to_net}}"
+    #     routes:
+    #       [
+    #         "f(-2.625, -4.625)(-3.5, -3.5)(-3.5, 0.625)",
+    #         "f(-3.5, 0.625)(-4.25, 1.375)",
+    #         "f(-4.25, 1.375)(-6.5, 1.375)",
+    #         "f(-6.5, 1.375)(-7.375, 2.125)",
+    #         "f(-7.375, 2.125)(-9.75, 2.125)",
+    #         "f(-9.75, 2.125)(-10.375, 3.0)",
+    #       ]
+    # key_to_net_diode_left_mid_route:
+    #   what: ceoloide/utility_router
+    #   where:
+    #     - /^matrix.*c2_r[12]/
+    #     - /mirror.*c3/
+    #     - /mirror.*c4_r[12]/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-10.375, 3.0)(-11.0, 3.75)"
+    # key_to_net_diode_right_start_route:
+    #   what: ceoloide/utility_router
+    #   where:
+    #     - /c3/
+    #     - /^matrix_c4_r[12]$/
+    #     - /mirror.*_c2_r[12]$/
+    #   params:
+    #     net: "{{to_net}}"
+    #     routes:
+    #       [
+    #         "f(2.75, -3.5)(3.625, -2.5)",
+    #         "f(3.625, -2.5)(3.625, 0.625)",
+    #         "f(3.625, 0.625)(5.25, 2.25)",
+    #       ]
+    # key_to_net_diode_right_mid_route:
+    #   what: ceoloide/utility_router
+    #   where:
+    #     - /^matrix_c4_r[12]$/
+    #     - /mirror.*_c2_r[12]$/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(5.25, 2.25)(5.25, 4.75)(7.0, 6.175)"
+    # key_to_net_matrix_c1_c2_start_route:
+    #   what: ceoloide/utility_router
+    #   where: /^matrix.*_c1/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(2.875, -3.5)(7.5, -3.5)"
+    # key_to_net_mirror_c1_c2_start_route:
+    #   what: ceoloide/utility_router
+    #   where: /mirror.*_c1/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-2.625, -4.625)(-11.875, -4.625)"
+    # key_to_net_matrix_c1_c2_r1_route:
+    #   what: ceoloide/utility_router
+    #   where: /^matrix.*_c1_r1/
+    #   params:
+    #     net: "{{to_net}}"
+    #     routes:
+    #       [
+    #         "f(7.5, -3.5)(8.5, -3.5)",
+    #         "f(8.5, -3.5)(10.25, -5.25)",
+    #         "f(10.25, -5.25)(10.5, -7.8)",
+    #       ]
+    # key_to_net_mirror_c1_c2_r1_route:
+    #   what: ceoloide/utility_router
+    #   where: /mirror.*_c1_r1/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-11.875, -4.625)(-13.625, -4.625)(-14.25, -5.075)"
+    # key_to_net_matrix_c1_c2_r2_route:
+    #   what: ceoloide/utility_router
+    #   where: /^matrix.*_c1_r2/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(7.5, -3.5)(9.0, -5.25)(9.0, -7.9)"
+    # key_to_net_mirror_c1_c2_r2_route:
+    #   what: ceoloide/utility_router
+    #   where: /mirror.*_c1_r2/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-11.875, -4.625)(-12.75, -5.17)"
+    # key_to_net_matrix_c2_c3_start_route:
+    #   what: ceoloide/utility_router
+    #   where: /^matrix.*_c2/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(2.875, -3.5)(8.375, -3.5)"
+    # key_to_net_mirror_c2_c3_start_route:
+    #   what: ceoloide/utility_router
+    #   where: /mirror.*_c2/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-2.625, -4.625)(-13.5, -4.0)"
+    # key_to_net_matrix_c2_c3_r1_route:
+    #   what: ceoloide/utility_router
+    #   where: /^matrix.*_c2_r1/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(8.375, -3.5)(10.25, -3.5)"
+    # key_to_net_mirror_c2_c3_r1_route:
+    #   what: ceoloide/utility_router
+    #   where: /mirror.*_c2_r1/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-13.5, -4.0)(-15.5, -4.0)"
+    # key_to_net_matrix_c2_c3_r2_route:
+    #   what: ceoloide/utility_router
+    #   where: /^matrix.*_c2_r2/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(8.375, -3.5)(9.25, -3.5)"
+    # key_to_net_mirror_c2_c3_r2_route:
+    #   what: ceoloide/utility_router
+    #   where: /mirror.*_c2_r2/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-13.5, -4.0)(-14.5, -4.0)"
+    # key_to_net_matrix_c3_c4_route:
+    #   what: ceoloide/utility_router
+    #   where: /^matrix_c3/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(5.25, 2.25)(15.9, 2.575)"
+    # key_to_net_mirror_c3_c4_route:
+    #   what: ceoloide/utility_router
+    #   where: /mirror.*_c3/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-11.0, 3.75)(-15.875, 3.75)"
+    # key_to_net_matrix_c4_c5_route:
+    #   what: ceoloide/utility_router
+    #   where: /^matrix_c4_r[12]/
+    #   params:
+    #     net: "{{to_net}}"
+    #     routes:
+    #       [
+    #         "f(5.25, 2.25)(5.25, 4.75)",
+    #         "f(5.25, 4.75)(7.0, 6.175)",
+    #         "f(7.0, 6.175)(15.8, 6.175)",
+    #       ]
+    # key_to_net_mirror_c4_c5_route:
+    #   what: ceoloide/utility_router
+    #   where: /mirror.*_c4_r[12]/
+    #   params:
+    #     net: "{{to_net}}"
+    #     route: "f(-11.0, 3.75)(-11.0, 5.75)(-12.5, 7.25)(-15.875, 7.25)"
+    # key_to_net_thumb_start_route:
+    #   what: ceoloide/utility_router
+    #   where:
+    #     - /^thumb_in/
+    #     - /mirror_thumb_out/
+    #   params:
+    #     net: "{{to_net}}"
+    #     routes:
+    #       [
+    #         "f(-2.625, -4.625)(-7.5, -4.625)",
+    #         "f(-7.5, -4.625)(-10.0, -6.0)",
+    #         "f(-10.0, -6.0)(-11.75, -5.625)",
+    #         "f(-11.75, -5.625)(-14.0, -2.75)",
+    #         "f(-14.0, -2.75)(-17.75, -1.75)",
+    #       ]
 
     # ----------------- Diodes ----------------- #
     diode:
