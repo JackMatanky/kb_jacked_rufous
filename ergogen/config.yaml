@@ -299,10 +299,12 @@ units:
   $extends: meta.preset
   $default_autobind: 0
 
+  # --------------- Board Mirror --------------- #
   mirror_shift: 16
   mirror_angle: 22
   mirror_distance: 2.25(key_size_x) # 40.5; Original: 23
 
+  # ----------- Key Switch Position ------------ #
   key_rotate: 180
   inner_key_rotate: 270
 
@@ -369,11 +371,14 @@ units:
   enc_diode_shift_x: -5.925
   enc_diode_shift_y: -9
 
-  # ------------ Charlieplex Diode Array ------------ #
-  diode_array_pitch_x: diode_size_x + 2.4 # 3.6; fits a trace and a via
-  diode_array_pitch_y: diode_size_y + 1.2 # 5.4
-  diode_array_shift_x: -10.8 # Centers the 7 columns on the MCU
-  diode_array_shift_y: -17 # MCU frame; under the pad rows, behind the OLED
+  # --------- Charlieplex Diode Array ---------- #
+  diode_array_size_x: 1.6
+  diode_array_size_y: 4.9
+  diode_array_pitch_x: diode_array_size_x + 5 # 6.6
+  diode_array_pitch_y: diode_array_size_y - diode_array_size_x # 3.3
+  diode_array_interrupt_shift_x: -(diode_array_size_x + 1) # -2.6
+  diode_array_shift_x: -3(diode_array_pitch_x) - diode_array_interrupt_shift_x / 2
+  diode_array_shift_y: -18 # MCU frame; under the pad rows
 
   # ------------- PCB & Case Holes ------------- #
   # Points height and width
@@ -715,12 +720,13 @@ points.zones:
       shift: [enc_shift_x, enc_shift_y]
       rotate: enc_rotate
 
+  # --------- Charlieplex Diode Array ---------- #
   # Charlie diode array: one column per node Kn.
-  # Bottom: charlie diode (Kn -> Pn). Top: interrupt diode (Kn -> INT).
+  # Charlie diode (Kn -> Pn). Interrupt diode (Kn -> INT) is above, to the left.
   diode_array:
     key:
-      width: diode_size_x
-      height: diode_size_y
+      width: diode_array_size_x
+      height: diode_array_size_y
       spread: diode_array_pitch_x
       padding: diode_array_pitch_y
     anchor:
@@ -729,6 +735,7 @@ points.zones:
     rows:
       charlie: {}
       interrupt:
+        shift: [diode_array_interrupt_shift_x, 0]
         to_net: INT
     columns:
       k1:
@@ -1306,7 +1313,8 @@ pcbs.jacked_rufous:
       what: kb_footprints/ergogen/encoder_roller
       where: encoder
       params:
-        reversible: true
+        # reversible: true
+        side: F
         S1: "{{from_net}}" # push switch: from net
         S2: "{{colrow}}" # push switch: diode anode net
         A: RE_A # encoder channels: MCU D14 / D15
@@ -1554,6 +1562,7 @@ pcbs.jacked_rufous:
       params:
         net: "{{from_net}}"
         route: "b(3.25, 5.875)(2.5, 33.0)(4.5, 38.0)"
+
     # Old row routes (R1..R6). Kept for reference.
     # Not valid for K nodes: neighbors can have different nets.
     # Re-enable only where all joined keys share one to_net.
