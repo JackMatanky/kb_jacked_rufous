@@ -362,6 +362,11 @@ units:
   tp_ffc_shift_y: -mcu_size_y
   tp_ffc_rotate: 0 # connector +y (ribbon side) must face the stick
 
+  # ----------------- Encoder ------------------ #
+  enc_shift_x: key_size_x
+  enc_shift_y: key_size_y
+  enc_rotate: 90
+
   # ------------- PCB & Case Holes ------------- #
   # Points height and width
   hole_size: 0.1
@@ -696,6 +701,16 @@ points.zones:
       ref: mcu
       shift: [tp_ffc_shift_x, tp_ffc_shift_y]
       rotate: tp_ffc_rotate
+  encoder:
+    key:
+      name: encoder
+      colrow: encoder
+      from_net: C5 # becomes P6 in the charlie step
+      to_net: R1 # becomes K7 in the charlie step
+    anchor:
+      ref: thumb_in
+      shift: [enc_shift_x, enc_shift_y]
+      rotate: enc_rotate
 
   # -------------- Mounting Holes -------------- #
   hole_top_left:
@@ -1241,14 +1256,11 @@ pcbs.jacked_rufous:
     # -------------- Scrollwheel --------------- #
     scrollwheel:
       what: kb_footprints/ergogen/encoder_roller
-      where:
-        ref: thumb_in
-        shift: [key_size_x, key_size_y]
-        rotate: 90
+      where: encoder
       params:
         reversible: true
-        S1: C5 # push switch: column net
-        S2: R1 # push switch: row net (the footprint doc says diode net)
+        S1: "{{from_net}}" # push switch: from net
+        S2: "{{to_net}}" # push switch: diode net
         A: RE_A # encoder channels: MCU D15 / D3
         B: RE_B
         C: GND # common
