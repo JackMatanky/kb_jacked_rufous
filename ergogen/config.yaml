@@ -338,11 +338,11 @@ units:
   power_rotate: -90
 
   # ---------- JST Battery Connector ----------- #
-  bat_main_shift_x: -(bat_size_x + mcu_size_xo)
-  bat_main_shift_y: mcu_size_y/3 #-(mcu_size_yo + oled_jumper_y + bat_size_x)
+  bat_main_shift_x: 0 #-(bat_size_x + mcu_size_xo)
+  bat_main_shift_y: 0 # mcu_size_y/3 #-(mcu_size_yo + oled_jumper_y + bat_size_x)
   bat_sec_shift_x: 0
   bat_sec_shift_y: -(bat_main_size_yo + bat_sec_size_yo)
-  bat_rotate: 0
+  bat_rotate: 270
 
   # --------------- Reset Switch --------------- #
   reset_shift_x: power_size_y
@@ -666,7 +666,11 @@ points.zones:
       width: bat_size_x
       height: bat_main_size_y
     anchor:
-      ref: mcu
+      aggregate.parts:
+        - ref: mirror_matrix_c5_r2
+        - ref: mirror_matrix_c4_r3
+        - ref: mirror_thumb_out
+        - ref: mirror_thumb_in
       shift: [bat_main_shift_x, bat_main_shift_y]
       rotate: bat_rotate
   bat_sec:
@@ -1795,6 +1799,44 @@ pcbs.jacked_rufous:
             "f(-11.0, 3.75)(-15.875, 3.75)",
           ]
 
+    # Node buses: each row chain to its array column. The front-layer run ends
+    # on a via beside the column. A short back-layer stub joins the anode.
+    key_bus_k6:
+      what: ceoloide/utility_router
+      where: /^matrix_c5_r1$/
+      params:
+        net: "{{to_net}}"
+        route: "f(2.750, -3.500)(2.704, -3.323)(8.885, 11.976)(36.548, 23.718)(37.006, 23.884)v(37.647, 25.469)"
+    key_bus_k7:
+      what: ceoloide/utility_router
+      where: /^matrix_c5_r2$/
+      params:
+        net: "{{to_net}}"
+        route: "f(2.750, -3.500)(2.997, -3.415)(30.660, 8.327)(30.754, 8.559)(30.887, 8.856)v(31.527, 10.442)"
+    key_bus_k2:
+      what: ceoloide/utility_router
+      where: /^mirror_matrix_c5_r1$/
+      params:
+        net: "{{to_net}}"
+        route: "f(2.750, -3.500)(2.474, -3.657)(0.847, -2.967)(0.151, -3.248)(-2.452, -2.143)(-3.576, 0.639)(-6.505, 1.882)(-8.940, 7.909)(-40.183, 21.171)(-40.558, 22.098)(-40.715, 22.385)v(-41.355, 23.971)"
+    key_bus_k3:
+      what: ceoloide/utility_router
+      where: /^mirror_matrix_c5_r2$/
+      params:
+        net: "{{to_net}}"
+        route: "f(2.750, -3.500)(2.413, -3.656)(2.181, -3.749)(0.554, -3.059)(-0.605, -3.527)(-24.037, 6.419)(-24.786, 8.274)(-28.041, 9.655)(-28.476, 9.830)v(-29.116, 11.416)"
+    key_bus_k1:
+      what: ceoloide/utility_router
+      where: /^thumb_in$/
+      params:
+        net: "{{to_net}}"
+        route: "f(2.750, -3.500)(2.672, -3.793)(2.067, -21.107)(11.956, -31.712)(12.122, -31.779)v(13.372, -30.613)"
+    key_bus_k5:
+      what: ceoloide/utility_router
+      where: /^mirror_thumb_out$/
+      params:
+        net: "{{to_net}}"
+        route: "f(2.750, -3.500)(2.472, -3.729)(-18.669, -17.988)(-24.916, -16.774)(-36.315, -24.463)(-36.554, -24.534)v(-37.511, -23.116)"
 
     # ----------------- Diodes ----------------- #
     diode:
