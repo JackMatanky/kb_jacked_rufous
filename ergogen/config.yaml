@@ -369,6 +369,12 @@ units:
   enc_diode_shift_x: -5.925
   enc_diode_shift_y: -9
 
+  # ------------ Charlieplex Diode Array ------------ #
+  diode_array_pitch_x: diode_size_x + 2.4 # 3.6; room for a trace and a via between pads
+  diode_array_pitch_y: diode_size_y + 1.2 # 5.4
+  diode_array_shift_x: -10.8 # centres 7 columns on the MCU
+  diode_array_shift_y: -17 # mcu frame; below the module's pad rows, behind the OLED
+
   # ------------- PCB & Case Holes ------------- #
   # Points height and width
   hole_size: 0.1
@@ -712,6 +718,44 @@ points.zones:
       shift: [enc_shift_x, enc_shift_y]
       rotate: enc_rotate
 
+  # Charlieplex diode array, one column per node Kn: a charlie diode (Kn -> Pn) with the
+  # interrupt diode (Kn -> INT) above it.
+  diode_array:
+    key:
+      width: diode_size_x
+      height: diode_size_y
+      spread: diode_array_pitch_x
+      padding: diode_array_pitch_y
+    anchor:
+      ref: mcu
+      shift: [diode_array_shift_x, diode_array_shift_y]
+    rows:
+      charlie: {}
+      interrupt:
+        to_net: INT
+    columns:
+      k1:
+        key.from_net: K1
+        rows.charlie.to_net: P1
+      k2:
+        key.from_net: K2
+        rows.charlie.to_net: P2
+      k3:
+        key.from_net: K3
+        rows.charlie.to_net: P3
+      k4:
+        key.from_net: K4
+        rows.charlie.to_net: P4
+      k5:
+        key.from_net: K5
+        rows.charlie.to_net: P5
+      k6:
+        key.from_net: K6
+        rows.charlie.to_net: P6
+      k7:
+        key.from_net: K7
+        rows.charlie.to_net: P7
+
   # -------------- Mounting Holes -------------- #
   hole_top_left:
     key: &hole
@@ -869,6 +913,12 @@ outlines:
     - what: rectangle
       size: [reset_size_x, reset_size_y]
       where: [reset]
+
+  # Charlieplex diode array
+  _diode_array:
+    - what: rectangle
+      size: [diode_size_x, diode_size_y]
+      where: /^diode_array_/
 
   # JST Battery Connector
   _jst:
@@ -1048,6 +1098,8 @@ outlines:
     - name: _trackpoint
       operation: stack
     - name: _trackpoint_reset
+      operation: stack
+    - name: _diode_array
       operation: stack
   _mount_holes:
     - operation: stack
@@ -1699,6 +1751,26 @@ pcbs.jacked_rufous:
         shift: [-diode_shift_x, diode_shift_y]
       params:
         from: "{{colrow}}"
+        to: "{{to_net}}"
+        side: "B"
+        reversible: false
+        include_tht: false
+    diode_charlie:
+      what: ceoloide/diode_tht_sod123
+      where: /^diode_array_.*_charlie$/
+      adjust.rotate: 90
+      params:
+        from: "{{from_net}}"
+        to: "{{to_net}}"
+        side: "B"
+        reversible: false
+        include_tht: false
+    diode_interrupt:
+      what: ceoloide/diode_tht_sod123
+      where: /^diode_array_.*_interrupt$/
+      adjust.rotate: -90
+      params:
+        from: "{{from_net}}"
         to: "{{to_net}}"
         side: "B"
         reversible: false
