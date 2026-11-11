@@ -370,10 +370,10 @@ units:
   enc_diode_shift_y: -9
 
   # ------------ Charlieplex Diode Array ------------ #
-  diode_array_pitch_x: diode_size_x + 2.4 # 3.6; room for a trace and a via between pads
+  diode_array_pitch_x: diode_size_x + 2.4 # 3.6. Space for a trace and a via.
   diode_array_pitch_y: diode_size_y + 1.2 # 5.4
-  diode_array_shift_x: -10.8 # centres 7 columns on the MCU
-  diode_array_shift_y: -17 # mcu frame; below the module's pad rows, behind the OLED
+  diode_array_shift_x: -10.8 # centers the 7 columns on the MCU
+  diode_array_shift_y: -17 # MCU frame. Below the pad rows and behind the OLED.
 
   # ------------- PCB & Case Holes ------------- #
   # Points height and width
@@ -440,14 +440,15 @@ units:
 # ---------------------------------------------- #
 #                     POINTS                     #
 # ---------------------------------------------- #
-# Charlieplex nets. Each key's switch connects drive pin `from_net` (P1..P7) to its
-# diode anode; the diode cathode goes to node `to_net` (K1..K7), and a charlie diode
-# (Kn -> Pn) returns the node to its pin. (from_net, to_net) pairs must be unique and
-# never share an index.
-#   - Columns share one drive pin across both halves, so mirror.from_net is absent.
-#   - Rows share a node per half (left r1=K6, r2=K7, r3=K1; right r1=K2, r2=K3, r3=K5),
-#     so every mirror.to_net is required.
-#   - Four keys deviate to K4 because a pin cannot pair with its own node.
+# Charlieplex nets.
+# Each switch connects the drive pin `from_net` (P1..P7) to its diode anode.
+# The diode cathode connects to the node `to_net` (K1..K7).
+# A charlie diode (Kn -> Pn) connects each node to its pin.
+# Each (from_net, to_net) pair is unique. The two indexes in a pair are different.
+#   - Both halves use the same drive pin for a column, so mirror.from_net is absent.
+#   - Each half uses one node for a row. Each mirror.to_net is necessary.
+#     Left: r1=K6, r2=K7, r3=K1. Right: r1=K2, r2=K3, r3=K5.
+#   - Four keys use K4, because a pin cannot pair with its own node.
 points.zones:
   # ----------- Base Keyboard Matrix ----------- #
   matrix:
@@ -564,7 +565,6 @@ points.zones:
         - key
         - thumb
         - non_tp
-      # mirror.colrow: "mirror_{{col.name}}_{{row}}"
     anchor:
       ref: matrix_c4_r3
       shift: [thumb_offset_x, thumb_offset_y]
@@ -592,7 +592,7 @@ points.zones:
             thumb_in_bind_left,
           ]
         from_net: P5
-      # Row-level override: rows take precedence over column keys, so the mirrored to_net deviation lives here
+      # Rows override column keys, so the mirrored to_net change is a row setting
       in.rows.home.mirror.to_net: K4
 
   ref_top_center:
@@ -718,8 +718,8 @@ points.zones:
       shift: [enc_shift_x, enc_shift_y]
       rotate: enc_rotate
 
-  # Charlieplex diode array, one column per node Kn: a charlie diode (Kn -> Pn) with the
-  # interrupt diode (Kn -> INT) above it.
+  # Charlieplex diode array: one column for each node Kn.
+  # Each column has a charlie diode (Kn -> Pn) and, above it, an interrupt diode (Kn -> INT).
   diode_array:
     key:
       width: diode_size_x
@@ -1170,7 +1170,7 @@ pcbs.jacked_rufous:
         include_battery_traces: true
         include_traces_vias: true
 
-        # Switch matrix drive pins (charlieplex; P7 is a node-only pin)
+        # Charlieplex drive pins (no key uses P7 as a drive pin)
         D0: P1
         D1: P2
         D2: P3
@@ -1179,7 +1179,7 @@ pcbs.jacked_rufous:
         D5: P6
         D6: P7
 
-        # Charlieplex interrupt (wakes the MCU on any press)
+        # Charlieplex interrupt (any key press wakes the MCU)
         D7: INT
 
         # nice!view SPI
@@ -1195,7 +1195,7 @@ pcbs.jacked_rufous:
         D14: RE_A
         D15: RE_B
 
-        # Spare pads, left at their defaults: D13, D17, D18, D19
+        # Spare pads (default nets): D13, D17, D18, D19
 
         # Reset
         RST: RST
@@ -1557,7 +1557,7 @@ pcbs.jacked_rufous:
       params:
         net: "{{from_net}}"
         route: "b(3.25, 5.875)(2.5, 33.0)(4.5, 38.0)"
-    # Row routes encoded the old R1..R6 rows; kept for reference, re-derive in KiCad for the K nodes.
+    # Row routes for the old R1..R6 rows. Kept for reference. Route the K nodes again in KiCad.
     # key_to_net_diode_top_route:
     #   what: ceoloide/utility_router
     #   where:
