@@ -394,8 +394,8 @@ units:
   hole_tp_shift_y: (tp_size_yo - hole_radius_mount)
 
   # -------------- Board Outline --------------- #
-  # >>> Unibody Bridge <<<
-  top_rect_margin: 0 # Bridge top edge beyond the USB-C tip; 0 = flush
+  # Unibody Bridge: top edge beyond the USB-C tip; 0 = flush
+  top_rect_margin: -(mcu_usb_conn_overhang - 0.5)
 
   # Circle: passes through the lowest corner of each thumb_in padded square
   # (distance arc_a from the axis, height arc_k_y) and the apex (arc_apex).
