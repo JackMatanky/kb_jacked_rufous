@@ -60,14 +60,16 @@ settings:
     $extends: presets.mcu.xiao
     mcu_size_xo: 0.5(mcu_size_x)
     mcu_size_yo: 0.5(mcu_size_y)
+    mcu_usb_conn_size_x: 8.94
+    mcu_usb_conn_size_y: 7.35
   display:
     $extends: presets.display.nice_view
-    # $extends: presets.display.other_display
+    # $extends: presets.display.ssd1306_091
+    # $extends: presets.display.ssd1306_096
     oled_size_xo: 0.5(oled_size_x)
     oled_size_yo: 0.5(oled_size_y)
   power:
     $extends: presets.power.smd_side
-    # $extends: presets.power.tht_top
     power_size_xo: 0.5(power_size_x)
     power_size_yo: 0.5(power_size_y)
   reset:
@@ -146,18 +148,14 @@ presets:
       diode_matrix_rotate: 270
 
   mcu:
-    nice_nano: # nice!nano: 34.1 x 18.3 x 3.3 (mm)
+    nice_nano: # nice!nano: 18.3 x 33 x 3.3 (mm)
       mcu_size_x: 18.3
-      mcu_size_y: 34.1
-      mcu_usb_conn_size_x: 8.94
-      mcu_usb_conn_size_y: 7.35
-      mcu_usb_conn_shift_y: 1.524 # USB-C tip beyond the controller edge: footprint USB outline 18.034 - controller outline 16.51
-    xiao: # XIAO nRF52840 Plus module body: 17.78 x 20.955 mm (footprint BOX.body)
-      mcu_size_x: 17.78
-      mcu_size_y: 20.955
-      mcu_usb_conn_size_x: 8.94
-      mcu_usb_conn_size_y: 7.35
-      mcu_usb_conn_shift_y: 1.51 # USB-C tip beyond the module edge: footprint BOX.usb.top - BOX.body.top (12.051 - 10.541)
+      mcu_size_y: 33
+      mcu_usb_conn_overhang: 1.1
+    xiao: # XIAO nRF52840: 17.8 x 21 (mm)
+      mcu_size_x: 17.8
+      mcu_size_y: 21
+      mcu_usb_conn_overhang: 1.51
 
   display:
     nice_view: # nice!view: 36 x 14 x 2.9 (mm)
@@ -175,6 +173,40 @@ presets:
       oled_screen_offset_x: 1.6
       oled_screen_offset_top_y: 2.45 + 3.65 # = 6.1
       oled_screen_offset_bot_y: 1.3 + 1.7 + 1.6 # = 4.6
+      oled_screen_shift_x: 0
+      oled_screen_shift_y: oled_size_y/2 - (oled_screen_size_yo + oled_screen_offset_top_y)
+    ssd1306_091: # 0.91" 128x32 OLED: 38 x 12 x 2.6 (mm)
+      oled_size_x: 12
+      oled_size_y: 38
+      oled_jumper_x: 10.82 # Scaled slightly narrower for 12mm width (standard 4-pin 2.54mm pitch = 10.16mm span)
+      oled_jumper_y: 2.66
+      oled_jumper_shift_y: -17.7 # Adjusted for 38mm length (-38/2 + 1.3)
+      # Active Screen Size: 22.38 x 5.58 (mm) | Glass Panel: 30.0 x 11.5 (mm)
+      oled_screen_size_x: 5.58 # Or use 11.5 if cutting out for the full glass panel
+      oled_screen_size_y: 22.38 # Or use 30.0 if cutting out for the full glass panel
+      oled_screen_size_xo: 0.5(oled_screen_size_x)
+      oled_screen_size_yo: 0.5(oled_screen_size_y)
+      # Screen Offset From Center (Active Area margins on a 38x12 PCB)
+      oled_screen_offset_x: 3.21 # (12 - 5.58) / 2
+      oled_screen_offset_top_y: 6.31 # ~2.5mm PCB top margin + ~3.81mm glass bezel
+      oled_screen_offset_bot_y: 9.31 # ~5.5mm PCB bottom header area + ~3.81mm glass bezel
+      oled_screen_shift_x: 0
+      oled_screen_shift_y: oled_size_y/2 - (oled_screen_size_yo + oled_screen_offset_top_y)
+    ssd1306_096: # 0.96" 128x64 OLED: 27.3 x 27.8 x 4.1 (mm)
+      oled_size_x: 27.3
+      oled_size_y: 27.8
+      oled_jumper_x: 12.82
+      oled_jumper_y: 2.66
+      oled_jumper_shift_y: -12.6 # Adjusted for 27.8mm length (-27.8/2 + 1.3)
+      # Active Screen Size (Rotated Vertical): 10.86 x 21.74 (mm) | Glass Panel: 19.26 x 26.7 (mm)
+      oled_screen_size_x: 10.86 # Or use 19.26 for full glass cutout
+      oled_screen_size_y: 21.74 # Or use 26.7 for full glass cutout
+      oled_screen_size_xo: 0.5(oled_screen_size_x)
+      oled_screen_size_yo: 0.5(oled_screen_size_y)
+      # Screen Offset From Center (Active Area margins on a 27.3x27.8 PCB)
+      oled_screen_offset_x: 8.22 # (27.3 - 10.86) / 2
+      oled_screen_offset_top_y: 2.03 # ~0.5mm PCB top margin + ~1.53mm glass bezel
+      oled_screen_offset_bot_y: 4.03 # ~0.5mm PCB bottom margin + ~3.53mm ribbon bezel
       oled_screen_shift_x: 0
       oled_screen_shift_y: oled_size_y/2 - (oled_screen_size_yo + oled_screen_offset_top_y)
 
@@ -392,7 +424,7 @@ units:
   arc_k_y: key_size_yo + 0.5(key_pad_x) arc_si - 0.5(key_pad_y) arc_ci
   # Apex: lowest of power toggle (0.625 = toggle width 1.25 / 2) and reset
   arc_apex: arc_rtc_y + min(power_shift_y - power_size_xo - 0.625, reset_shift_y - reset_size_yo) - arc_clear
-  arc_top: arc_rtc_y + mcu_shift_y + mcu_size_yo + mcu_usb_conn_shift_y + top_rect_margin
+  arc_top: arc_rtc_y + mcu_shift_y + mcu_size_yo + mcu_usb_conn_overhang + top_rect_margin
 
   arc_s: arc_apex - arc_k_y
   bot_crcl_radius: (arc_a^2 + arc_s^2)/(2 arc_s)
@@ -792,7 +824,7 @@ outlines:
       fillet: 0.1
       operation: stack
       adjust:
-        shift: [0, mcu_size_yo - mcu_usb_conn_size_y/2 + mcu_usb_conn_shift_y]
+        shift: [0, mcu_size_yo - mcu_usb_conn_size_y/2 + mcu_usb_conn_overhang]
 
   # OLED Display
   _oled:
